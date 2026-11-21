@@ -11,6 +11,7 @@ import HowToBeAHeroTool from "./item/tool.mjs";
 
 // Import Ability data
 import HowToBeAHeroAbility from "./item/ability.mjs"
+import HowToBeAHeroMagic from "./item/magic.mjs"
 
 // Import Effect data
 import HowToBeAHeroActiveEffectData from "./effect/active-effect.mjs";
@@ -27,6 +28,7 @@ export {
     HowToBeAHeroArmor,
     HowToBeAHeroTool,
     HowToBeAHeroAbility,
+    HowToBeAHeroMagic,
     // Export effect types
     HowToBeAHeroActiveEffectData
   };
@@ -46,5 +48,6 @@ export const config = {
     armor: HowToBeAHeroArmor,
     tool: HowToBeAHeroTool,
     ability: HowToBeAHeroAbility,
+    magic: HowToBeAHeroMagic,
     effect: HowToBeAHeroActiveEffectData,
   };

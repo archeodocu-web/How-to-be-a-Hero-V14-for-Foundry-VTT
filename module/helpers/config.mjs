@@ -1,5 +1,8 @@
 import { preLocalize } from "./utils.mjs";
 
+// Must match the package id in system.json; Foundry validates document flag scopes.
+export const SYSTEM_ID = "how-to-be-a-hero";
+
 export const HOW_TO_BE_A_HERO = {};
 /**
  * The set of skillSets used within the system.

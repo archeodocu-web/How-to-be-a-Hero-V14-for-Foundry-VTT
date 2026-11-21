@@ -21,7 +21,8 @@ export const preloadHandlebarsTemplates = async function () {
       "systems/how-to-be-a-hero/templates/actor/tabs/character-details.hbs",
       "systems/how-to-be-a-hero/templates/actor/tabs/character-inventory.hbs",
       "systems/how-to-be-a-hero/templates/actor/tabs/character-biography.hbs",
-      "systems/how-to-be-a-hero/templates/actor/tabs/character-effects.hbs"
+      "systems/how-to-be-a-hero/templates/actor/tabs/character-effects.hbs",
+      "systems/how-to-be-a-hero/templates/actor/tabs/character-magic.hbs"
     ],
     
     // Actor parts partials
@@ -40,6 +41,7 @@ export const preloadHandlebarsTemplates = async function () {
       "systems/how-to-be-a-hero/templates/item/parts/consumable-sidebar.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/tool-sidebar.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/ability-sidebar.hbs",
+      "systems/how-to-be-a-hero/templates/item/parts/magic-sidebar.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/item-sidebar.hbs",
       // Item type-specific content parts
       "systems/how-to-be-a-hero/templates/item/parts/weapon-content.hbs",
@@ -47,6 +49,7 @@ export const preloadHandlebarsTemplates = async function () {
       "systems/how-to-be-a-hero/templates/item/parts/consumable-content.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/tool-content.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/ability-content.hbs",
+      "systems/how-to-be-a-hero/templates/item/parts/magic-content.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/item-content.hbs"
     ],
 
@@ -124,7 +127,8 @@ export const preloadHandlebarsTemplates = async function () {
       'htbah.character-details',
       'htbah.character-inventory', 
       'htbah.character-effects',
-      'htbah.character-biography'
+      'htbah.character-biography',
+      'htbah.character-magic'
     ];
 
     const registeredPartials = expectedPartials.filter(name => {

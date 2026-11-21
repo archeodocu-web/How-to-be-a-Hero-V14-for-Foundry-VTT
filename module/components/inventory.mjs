@@ -244,34 +244,42 @@ export default class InventoryElement extends HTMLElement {
    * @returns {ContextMenuEntry[]}  An array of context menu options offered for the Item.
    * @protected
    */
+  _canEditItem(item) {
+    if (!item) return false;
+    if (game.user.isGM || item.isOwner) return true;
+    // Embedded Items inherit the edit capability of their owning Actor.
+    return Boolean(item.isEmbedded && item.actor?.isOwner);
+  }
+
   _getContextOptions(item) {
     // Check if the sheet is in edit mode
     const isEditMode = this._app && this._app._mode === this._app.constructor.MODES.EDIT;
+    const canEditItem = this._canEditItem(item);
     
     // Standard Options
     const options = [
       {
         label: game.i18n.localize("HTBAH.CONTEXTMENUACTIONEDIT"),
         icon: "<i class='fas fa-edit fa-fw'></i>",
-        visible: () => item.isOwner && !isEditMode,
+        visible: () => canEditItem && !isEditMode,
         callback: li => this._onAction(li, "edit")
       },
       {
         label: game.i18n.localize("HTBAH.ITEMVIEW"),
         icon: '<i class="fas fa-eye"></i>',
-        visible: () => !item.isOwner,
+        visible: () => !canEditItem,
         callback: li => this._onAction(li, "view")
       },
       {
         label: game.i18n.localize("HTBAH.CONTEXTMENUACTIONDUPLICATE"),
         icon: "<i class='fas fa-copy fa-fw'></i>",
-        visible: () => !item.system.metadata?.singleton && !["class", "subclass"].includes(item.type) && item.isOwner,
+        visible: () => !item.system.metadata?.singleton && !["class", "subclass"].includes(item.type) && canEditItem,
         callback: li => this._onAction(li, "duplicate")
       },
       {
         label: game.i18n.localize("HTBAH.CONTEXTMENUACTIONDELETE"),
         icon: "<i class='fas fa-trash fa-fw'></i>",
-        visible: () => item.isOwner && !isEditMode,
+        visible: () => canEditItem && !isEditMode,
         callback: li => this._onAction(li, "delete")
       },
       {
@@ -279,7 +287,7 @@ export default class InventoryElement extends HTMLElement {
         icon: "<i class='fas fa-handshake fa-fw'></i>",
         visible: () => {
           const transferableTypes = ["item", "consumable", "weapon", "armor", "tool"];
-          return item.isOwner && transferableTypes.includes(item.type);
+          return canEditItem && transferableTypes.includes(item.type);
         },
         callback: li => this._onAction(li, "giveItem")
       }
@@ -291,7 +299,7 @@ export default class InventoryElement extends HTMLElement {
     if ( "equipped" in item.system ) options.push({
       label: game.i18n.localize(item.system.equipped ? "HTBAH.UNEQUIP" : "HTBAH.EQUIP"),
       icon: "<i class='fas fa-shield-alt fa-fw'></i>",
-      visible: () => item.isOwner && isEditMode,
+      visible: () => canEditItem && isEditMode,
       callback: li => this._onAction(li, "equip"),
       group: "state"
     });
@@ -303,7 +311,7 @@ export default class InventoryElement extends HTMLElement {
       options.push({
         label: game.i18n.localize(isFavorited ? "HTBAH.FAVORITEREMOVE" : "HTBAH.FAVORITE"),
         icon: "<i class='fas fa-star fa-fw'></i>",
-        visible: () => item.isOwner,
+        visible: () => canEditItem,
         callback: li => this._onAction(li, isFavorited ? "unfavorite" : "favorite"),
         group: "state"
       });
@@ -391,6 +399,11 @@ export default class InventoryElement extends HTMLElement {
     const itemId = target.closest("[data-item-id]")?.dataset.itemId;
     const item = await this.getItem(itemId);
     if ( !["create", "currency"].includes(action) && !item ) return;
+    const itemMutationActions = new Set(["edit", "delete", "duplicate", "giveItem", "equip", "favorite", "unfavorite"]);
+    if (item && itemMutationActions.has(action) && !this._canEditItem(item)) {
+      ui.notifications.warn(game.i18n.localize("HTBAH.ItemEditPermissionDenied"));
+      return;
+    }
 
     switch ( action ) {
       case "create":

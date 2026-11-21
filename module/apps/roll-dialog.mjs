@@ -1,3 +1,4 @@
+import { SYSTEM_ID } from "../helpers/config.mjs";
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
 /**
@@ -44,6 +45,7 @@ export class HowToBeAHeroRollDialog extends HandlebarsApplicationMixin(foundry.a
     this.baseFormula = options.baseFormula || "1d10";
     this.rollType = options.rollType || "check";
     this.isParry = options.isParry || false;
+    this.magicUseData = options.magicUseData ?? null;
     this.bonus = 0;
     this.#resolve = null;
     this.#reject = null;
@@ -112,7 +114,7 @@ export class HowToBeAHeroRollDialog extends HandlebarsApplicationMixin(foundry.a
    */
   _calculateFinalFormula(bonus) {
     // For weapon damage rolls, show the bonus in the roll formula itself
-    if (this.item && this.item.type === "weapon") {
+    if (this.item && ["weapon", "magic"].includes(this.item.type)) {
       const bonusStr = bonus === 0 ? '' : (bonus > 0 ? `+${bonus}` : `${bonus}`);
       return `${this.baseFormula}${bonusStr}`;
     }
@@ -128,8 +130,8 @@ export class HowToBeAHeroRollDialog extends HandlebarsApplicationMixin(foundry.a
    * @returns {string} The dice formula
    */
   _getRollFormula() {
-    // For weapon damage rolls, include bonus directly in the formula
-    if (this.item && this.item.type === "weapon") {
+    // Weapon damage and magic ability rolls include their optional bonus directly.
+    if (this.item && ["weapon", "magic"].includes(this.item.type)) {
       const bonusStr = this.bonus === 0 ? '' : (this.bonus > 0 ? `+${this.bonus}` : `${this.bonus}`);
       return `${this.baseFormula}${bonusStr}`;
     }
@@ -222,24 +224,32 @@ export class HowToBeAHeroRollDialog extends HandlebarsApplicationMixin(foundry.a
       await roll.evaluate();
       
       // Create customized chat message based on item type
-      const messageContent = await HowToBeAHeroRollDialog._createChatMessage(this.item, roll, rollFormula, this.bonus, this.isParry);
+      const messageContent = await HowToBeAHeroRollDialog._createChatMessage(this.item, roll, rollFormula, this.bonus, this.isParry, this.magicUseData);
       
+      const targetActorUuids = Array.from(game.user.targets || [])
+        .map(token => token?.actor?.uuid)
+        .filter(uuid => typeof uuid === "string" && uuid.length > 0);
+
+      const flags = {};
+      if (this.item?.type === "weapon") {
+        flags[SYSTEM_ID] = {
+          damage: {
+            amount: Math.max(0, Number(roll.total) || 0),
+            formula: rollFormula,
+            itemName: this.item.name,
+            targetActorUuids
+          }
+        };
+      } else if (this.item?.type === "magic" && this.magicUseData) {
+        flags[SYSTEM_ID] = { magicUse: this.magicUseData };
+      }
+
       const messageData = {
         user: game.user.id,
-        speaker: ChatMessage.getSpeaker(),
+        speaker: this.item?.actor ? ChatMessage.getSpeaker({ actor: this.item.actor }) : ChatMessage.getSpeaker(),
         content: messageContent,
         sound: CONFIG.sounds.dice,
-        ...(this.item?.type === "weapon" ? {
-          flags: {
-            howtobeahero: {
-              damage: {
-                amount: Math.max(0, Number(roll.total) || 0),
-                formula: rollFormula,
-                itemName: this.item.name
-              }
-            }
-          }
-        } : {})
+        ...(Object.keys(flags).length ? { flags } : {})
       };
       
       await ChatMessage.create(messageData);
@@ -287,8 +297,10 @@ export class HowToBeAHeroRollDialog extends HandlebarsApplicationMixin(foundry.a
   /**
    * Create customized chat message based on item type
    */
-  static async _createChatMessage(item, roll, finalFormula, bonus, isParry = false) {
+  static async _createChatMessage(item, roll, finalFormula, bonus, isParry = false, magicUseData = null) {
     const rollTotal = roll.total;
+
+    if (item?.type === "magic") return this._createMagicChatMessage(item, roll, rollTotal, bonus, magicUseData);
     
     // Handle parry rolls specifically
     if (isParry && item.type === "ability") {
@@ -392,6 +404,27 @@ export class HowToBeAHeroRollDialog extends HandlebarsApplicationMixin(foundry.a
             <p>Roll: ${renderedRoll}</p>
           </div>
         </div>
+      </div>
+    `;
+  }
+
+  /** Create the chat card for an optional magic ability roll. */
+  static async _createMagicChatMessage(item, roll, rollTotal, bonus, magicUseData = null) {
+    const renderedRoll = await roll.render();
+    const manaCost = Math.max(0, Number(item.system?.manaCost) || 0);
+    const effectType = item.system?.effectType || "none";
+    const effectValue = Math.max(0, Number(item.system?.effectValue) || 0);
+    const effectLabel = effectType === "armor" && effectValue > 0 ? `+${effectValue} ${game.i18n.localize("HTBAH.ArmorClass")}` : "";
+    const safeName = Handlebars.escapeExpression(item.name);
+    return `
+      <div class="htbah-magic-roll">
+        <h3><i class="fas fa-wand-magic-sparkles"></i> ${safeName}</h3>
+        <div class="htbah-magic-roll__result"><strong>${rollTotal}</strong></div>
+        <div>${renderedRoll}</div>
+        <p>${game.i18n.localize("HTBAH.Magic.ManaCostShort")}: <strong>${manaCost}</strong></p>
+        ${magicUseData?.targetActorNames?.length ? `<p>${game.i18n.localize("HTBAH.Magic.Target")}: <strong>${magicUseData.targetActorNames.map(name => Handlebars.escapeExpression(name)).join(", ")}</strong></p>` : ""}
+        ${effectLabel ? `<p>${game.i18n.localize("HTBAH.Magic.Effect")}: ${effectLabel}</p>` : ""}
+        ${bonus ? `<p>${game.i18n.localize("HTBAH.RollDialog.Bonus")}: ${bonus > 0 ? "+" : ""}${bonus}</p>` : ""}
       </div>
     `;
   }

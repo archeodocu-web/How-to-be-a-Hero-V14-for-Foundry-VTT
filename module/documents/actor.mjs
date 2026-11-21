@@ -1,3 +1,4 @@
+import { SYSTEM_ID } from "../helpers/config.mjs";
 import { d100Roll, d10Roll } from "../dice/dice.mjs";
 import { HowToBeAHeroRollDialog } from "../apps/roll-dialog.mjs";
 
@@ -9,7 +10,7 @@ export class HowToBeAHeroActor extends Actor {
   prepareData() {
     super.prepareData();
     const systemData = this.system;
-    const flags = this.flags.howtobeahero || {};
+    const flags = this.flags[SYSTEM_ID] || {};
 
     this._prepareCharacterData();
     this._prepareNpcData(); 
@@ -98,15 +99,36 @@ export class HowToBeAHeroActor extends Actor {
       return total + armorValue;
     }, 0);
     
-    // Store the calculated values for easy access
+    // Respect both calculated equipped armor and a manually configured base
+    // armor value (commonly used on NPCs), then layer temporary magic bonuses.
+    const manualArmorValue = Number(this.system?.attributes?.armor?.value) || 0;
+    const baseArmorTotal = Math.max(totalArmorClass, manualArmorValue, 0);
+
+    // Temporary armor bonuses granted by applied magic effects are layered
+    // on top of the base armor and are not written into the base armor field.
+    const magicArmorEffects = Array.from(this.effects ?? []).filter(effect => {
+      const magicEffect = effect.flags?.[SYSTEM_ID]?.magicEffect;
+      return !effect.disabled && !effect.duration?.expired && magicEffect?.type === "armor";
+    });
+    const magicArmorBonus = magicArmorEffects.reduce((total, effect) => {
+      const value = Number(effect.flags?.[SYSTEM_ID]?.magicEffect?.value) || 0;
+      return total + Math.max(0, value);
+    }, 0);
+
+    // Store calculated equipment and temporary armor separately for display
+    // and damage mitigation. The persistent system.attributes.armor.value
+    // remains the base/manual value, preserving existing sheet behavior.
     this.armorData = {
       equipped: totalArmorClass,
-      total: totalArmorClass,
+      base: baseArmorTotal,
+      magicBonus: magicArmorBonus,
+      total: baseArmorTotal + magicArmorBonus,
       equippedItems: equippedArmor.map(armor => ({
         id: armor.id,
         name: armor.name,
         armorValue: armor.system.armor || 0
-      }))
+      })),
+      magicEffects: magicArmorEffects.map(effect => ({ id: effect.id, name: effect.name, bonus: Number(effect.flags?.[SYSTEM_ID]?.magicEffect?.value) || 0, duration: effect.duration?.label || "" }))
     };
   }
 
@@ -138,6 +160,9 @@ export class HowToBeAHeroActor extends Actor {
     const critical = damageData.critical || false;
     const bonusValue = damageData.bonus || 0;
     const target = damageData.target || null;
+    const targetActorUuids = Array.from(game.user.targets || [])
+      .map(token => token?.actor?.uuid)
+      .filter(uuid => typeof uuid === "string" && uuid.length > 0);
     const flavor = game.i18n.localize("HTBAH.DamageRollPrompt");
     
     // Use the formula from damageData if provided, otherwise default to 1d10
@@ -157,8 +182,11 @@ export class HowToBeAHeroActor extends Actor {
       messageData: {
         speaker: options.speaker || ChatMessage.getSpeaker({actor: this}),
         flags: {
-          howtobeahero: {
-            roll: { type: "damage", data: damageData }
+          [SYSTEM_ID]: {
+            roll: {
+            type: "damage",
+            data: { ...damageData, targetActorUuids }
+          }
           }
         }
       }

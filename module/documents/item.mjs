@@ -1,5 +1,34 @@
 import { d100Roll } from "../dice/dice.mjs";
 import { HowToBeAHeroRollDialog } from "../apps/roll-dialog.mjs";
+import { SYSTEM_ID } from "../helpers/config.mjs";
+
+/**
+ * Apply the user's current Chat Message visibility mode without invoking
+ * Foundry V14's deprecated core.rollMode setting or legacy applyRollMode API.
+ * Foundry V13 is retained as a compatibility fallback while this system
+ * continues to declare V13 as its minimum supported generation.
+ * @param {object} chatData ChatMessage data to apply visibility to.
+ * @returns {object} Chat data with whisper/blind fields set for the current mode.
+ */
+function applyCurrentMessageVisibility(chatData) {
+  const settings = game.settings?.settings;
+  const hasModernMessageMode = settings instanceof Map
+    ? settings.has("core.messageMode")
+    : Boolean(settings?.["core.messageMode"]);
+
+  if (hasModernMessageMode && typeof ChatMessage.applyMode === "function") {
+    const messageMode = game.settings.get("core", "messageMode");
+    return ChatMessage.applyMode(chatData, messageMode);
+  }
+
+  // Legacy branch for Foundry V13, where messageMode/applyMode are not present.
+  if (typeof ChatMessage.applyRollMode === "function") {
+    const rollMode = game.settings.get("core", "rollMode");
+    return ChatMessage.applyRollMode(chatData, rollMode);
+  }
+
+  return chatData;
+}
 /**
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
@@ -134,7 +163,6 @@ async roll(options = {}) {
   if (!actor) return;
 
   const speaker = ChatMessage.getSpeaker({ actor: actor });
-  const rollMode = game.settings.get('core', 'rollMode');
   const isParry = options.isParry || false;
   const label = isParry ? `[${game.i18n.localize("HTBAH.Parry")}] ${item.name}` : `[${item.type}] ${item.name}`;
 
@@ -144,12 +172,12 @@ async roll(options = {}) {
   const isRollable = this.type === 'weapon' || this.type === 'ability' || this.system.rollable === true;
   
   if (!isRollable) {
-    ChatMessage.create({
+    const chatData = {
       speaker: speaker,
-      rollMode: rollMode,
       flavor: label,
       content: item.system.description ?? ''
-    });
+    };
+    ChatMessage.create(applyCurrentMessageVisibility(chatData));
     return;
   }
 
@@ -186,10 +214,82 @@ async roll(options = {}) {
     item: this,
     baseFormula: baseFormula,
     rollType: rollType,
-    isParry: isParry
+    isParry: isParry,
+    magicUseData: options.magicUseData ?? null
   });
 
   return dialog;
+}
+
+/**
+ * Publish/use a magic ability. Mana and target effects are intentionally not
+ * applied here; the user applies them from this ChatMessage's right-click menu.
+ */
+async useMagic() {
+  if (this.type !== "magic" || !this.actor) return;
+  const actor = this.actor;
+  if (!game.user.isGM && !actor.isOwner) {
+    ui.notifications.warn(game.i18n.localize("HTBAH.ApplyDamageNoPermission"));
+    return;
+  }
+
+  const effectType = this.system.effectType || "none";
+  const selectedTargets = Array.from(game.user.targets || []).filter(token => token?.actor);
+  const targetActorUuids = selectedTargets
+    .map(token => token.actor.uuid)
+    .filter(uuid => typeof uuid === "string" && uuid.length > 0);
+  const targetActorNames = selectedTargets.map(token => token.actor.name);
+
+  const configuredEffectValue = Math.max(0, Math.floor(Number(this.system.effectValue) || 0));
+  if (effectType === "armor" && configuredEffectValue > 0 && targetActorUuids.length !== 1) {
+    ui.notifications.warn(game.i18n.localize("HTBAH.Magic.SelectExactlyOneTarget"));
+    return;
+  }
+
+  const magicUseData = {
+    sourceActorUuid: actor.uuid,
+    sourceActorName: actor.name,
+    sourceItemUuid: this.uuid,
+    itemName: this.name,
+    icon: this.system.icon || this.img,
+    manaCost: Math.max(0, Math.floor(Number(this.system.manaCost) || 0)),
+    targetActorUuids: [...new Set(targetActorUuids)],
+    targetActorNames,
+    effect: {
+      type: effectType,
+      value: Math.max(0, Math.floor(Number(this.system.effectValue) || 0)),
+      durationRounds: Math.max(0, Math.floor(Number(this.system.durationRounds) || 0))
+    },
+    manaSpent: false,
+    effectApplied: false
+  };
+
+  if (this.system.rollable === true) {
+    return this.roll({ magicUseData });
+  }
+
+  const safeName = Handlebars.escapeExpression(this.name);
+  const description = Handlebars.escapeExpression(String(this.system.description || "")).replace(/\r?\n/g, "<br>");
+  const effectSummary = magicUseData.effect.type === "armor" && magicUseData.effect.value > 0
+    ? `<p>${game.i18n.localize("HTBAH.Magic.Effect")}: +${magicUseData.effect.value} ${game.i18n.localize("HTBAH.ArmorClass")}</p>`
+    : "";
+  const content = `
+    <div class="htbah-magic-use">
+      <h3><i class="fas fa-wand-magic-sparkles"></i> ${safeName}</h3>
+      ${description ? `<div class="htbah-magic-use__description">${description}</div>` : ""}
+      <p>${game.i18n.localize("HTBAH.Magic.ManaCostShort")}: <strong>${magicUseData.manaCost}</strong></p>
+      ${magicUseData.targetActorNames.length ? `<p>${game.i18n.localize("HTBAH.Magic.Target")}: <strong>${magicUseData.targetActorNames.map(name => Handlebars.escapeExpression(name)).join(", ")}</strong></p>` : ""}
+      ${effectSummary}
+    </div>
+  `;
+  const chatData = {
+    user: game.user.id,
+    speaker: ChatMessage.getSpeaker({ actor }),
+    flavor: game.i18n.format("HTBAH.Magic.UsedBy", { actor: actor.name }),
+    content,
+    flags: { [SYSTEM_ID]: { magicUse: magicUseData } }
+  };
+  return ChatMessage.create(applyCurrentMessageVisibility(chatData));
 }
 
 getRollData() {

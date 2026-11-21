@@ -1,4 +1,6 @@
 import { HowToBeAHeroItem } from '../documents/item.mjs';
+import { ITEM_ICON_CATALOG } from '../helpers/item-icons.mjs';
+import { MAGIC_ICON_CATALOG } from '../helpers/magic-icons.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -10,8 +12,8 @@ export class HowToBeAHeroItemSheet extends HandlebarsApplicationMixin(foundry.ap
   static DEFAULT_OPTIONS = {
     classes: ["how-to-be-a-hero", "sheet", "item"],
     position: {
-      width: 560,
-      height: "auto"
+      width: 760,
+      height: 620
     },
     window: {
       resizable: true
@@ -21,7 +23,9 @@ export class HowToBeAHeroItemSheet extends HandlebarsApplicationMixin(foundry.ap
       editDescription: this.prototype._onEditDescription,
       updateValue: this.prototype._onUpdateValue,
       showPortrait: this.prototype._onShowPortrait,
-      rollItem: this.prototype._onRollItem
+      openItemIconGallery: this.prototype._onOpenItemIconGallery,
+      rollItem: this.prototype._onRollItem,
+      selectItemIcon: this.prototype._onSelectItemIcon
     }
   };
 
@@ -31,6 +35,19 @@ export class HowToBeAHeroItemSheet extends HandlebarsApplicationMixin(foundry.ap
       scrollable: [".tab[data-tab=description] .editor-content"]
     }
   };
+
+  /**
+   * Embedded inventory items follow the ownership of their parent Actor.
+   * This lets a player with OWNER permission on their character edit its items
+   * without requiring GM privileges. World Items continue to use Foundry's
+   * standard ItemSheetV2 permission threshold.
+   */
+  get isEditable() {
+    const item = this.document;
+    const parentActor = item?.isEmbedded ? item.actor : null;
+    if (parentActor) return Boolean(game.user.isGM || parentActor.isOwner || item.isOwner);
+    return super.isEditable;
+  }
 
   get title() {
     return this.document.name;
@@ -71,6 +88,9 @@ export class HowToBeAHeroItemSheet extends HandlebarsApplicationMixin(foundry.ap
       // Ensure item type is available for template partials
       context.itemType = this._getLocalizedItemType(item);
       context.document = this.document; // Ensure document is available in template
+      context.editable = this.isEditable;
+      context.iconCatalog = this._getAvailableIcons(item.type);
+      context.selectedIcon = item.system?.icon ?? "";
 
       // Ensure rollable property exists with proper default for template rendering
       if (this.document.system.rollable === undefined) {
@@ -111,7 +131,13 @@ export class HowToBeAHeroItemSheet extends HandlebarsApplicationMixin(foundry.ap
   }
 
   _getLocalizedItemType(item) {
-    return game.i18n.localize(CONFIG.Item.typeLabels[item.type]);
+    const label = item.type === "magic" ? "HTBAH.MagicAbility" : CONFIG.Item.typeLabels?.[item.type];
+    return label ? game.i18n.localize(label) : item.type;
+  }
+
+  _getAvailableIcons(type = this.document.type) {
+    if (type === "magic") return MAGIC_ICON_CATALOG;
+    return ITEM_ICON_CATALOG.filter(icon => icon.type === type);
   }
 
   /** @override */
@@ -123,6 +149,17 @@ export class HowToBeAHeroItemSheet extends HandlebarsApplicationMixin(foundry.ap
 
     // Setup form input handling for automatic saving
     this._setupFormHandling();
+
+    // Show or hide the configured magic-effect fields when the effect type changes.
+    const effectTypeSelect = this.element.querySelector('select[name="system.effectType"]');
+    const effectFields = this.element.querySelector('.magic-effect-fields');
+    if (effectTypeSelect && effectFields) {
+      const updateMagicEffectVisibility = () => {
+        effectFields.hidden = effectTypeSelect.value === "none";
+      };
+      updateMagicEffectVisibility();
+      effectTypeSelect.addEventListener('change', updateMagicEffectVisibility);
+    }
 
     // Handle rollable checkbox changes
     const rollableCheckbox = this.element.querySelector('input[name="system.rollable"]');
@@ -140,7 +177,7 @@ export class HowToBeAHeroItemSheet extends HandlebarsApplicationMixin(foundry.ap
     }
 
     // Handle roll field changes for all item types that have roll fields
-    const itemTypesWithRolls = ['weapon', 'item', 'consumable', 'tool'];
+    const itemTypesWithRolls = ['weapon', 'item', 'consumable', 'tool', 'magic'];
     if (itemTypesWithRolls.includes(this.document.type)) {
       this.element.querySelectorAll('input[name="system.roll.diceNum"], select[name="system.roll.diceSize"]').forEach(input => {
         input.addEventListener('change', this._onUpdateRollFields.bind(this));
@@ -187,6 +224,7 @@ export class HowToBeAHeroItemSheet extends HandlebarsApplicationMixin(foundry.ap
    * Handle form input changes
    */
   async _onFormInput(event) {
+    if (!this.isEditable) return;
     const target = event.target;
     const name = target.name;
     const value = target.value;
@@ -305,6 +343,154 @@ export class HowToBeAHeroItemSheet extends HandlebarsApplicationMixin(foundry.ap
   }
 
   /**
+   * Open a wide, searchable SVG gallery for the current Item type.
+   * The native HTML dialog avoids sending users to Foundry's file browser
+   * when they only want to change the inventory silhouette.
+   */
+  async _onOpenItemIconGallery(event) {
+    event.preventDefault();
+    if (!this.isEditable) {
+      ui.notifications.warn(game.i18n.localize("HTBAH.ItemEditPermissionDenied"));
+      return;
+    }
+
+    const icons = this._getAvailableIcons(this.document.type);
+    if (!icons.length) {
+      ui.notifications.warn(game.i18n.localize("HTBAH.ItemIconNoOptions"));
+      return;
+    }
+
+    document.querySelectorAll("dialog.htbah-item-icon-picker").forEach(dialog => dialog.remove());
+
+    const dialog = document.createElement("dialog");
+    dialog.className = "htbah-item-icon-picker";
+    dialog.setAttribute("aria-labelledby", "htbah-item-icon-picker-title");
+
+    const panel = document.createElement("div");
+    panel.className = "htbah-item-icon-picker__panel";
+
+    const header = document.createElement("header");
+    header.className = "htbah-item-icon-picker__header";
+    const title = document.createElement("h2");
+    title.id = "htbah-item-icon-picker-title";
+    title.textContent = `${game.i18n.localize("HTBAH.ItemIcon")} – ${this.document.name}`;
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "htbah-item-icon-picker__close";
+    closeButton.textContent = "×";
+    closeButton.setAttribute("aria-label", game.i18n.localize("Close"));
+    closeButton.addEventListener("click", () => dialog.close());
+    header.append(title, closeButton);
+
+    const toolbar = document.createElement("div");
+    toolbar.className = "htbah-item-icon-picker__toolbar";
+    const search = document.createElement("input");
+    search.type = "search";
+    search.className = "htbah-item-icon-picker__search";
+    search.placeholder = game.i18n.localize("HTBAH.SearchIcons");
+    search.setAttribute("aria-label", game.i18n.localize("HTBAH.SearchIcons"));
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.className = "htbah-item-icon-picker__reset";
+    resetButton.textContent = game.i18n.localize("HTBAH.ItemIconUseOriginal");
+    resetButton.addEventListener("click", async () => {
+      await this._saveItemIcon("");
+      dialog.close();
+    });
+    toolbar.append(search, resetButton);
+
+    const grid = document.createElement("div");
+    grid.className = "htbah-item-icon-picker__grid";
+    const selectedPath = this.document.system?.icon ?? "";
+
+    for (const icon of icons) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "htbah-icon-choice";
+      button.dataset.iconName = icon.name;
+      button.classList.toggle("selected", icon.path === selectedPath);
+      button.setAttribute("aria-pressed", String(icon.path === selectedPath));
+      button.title = icon.name;
+
+      const image = document.createElement("img");
+      image.src = icon.path;
+      image.alt = "";
+      image.loading = "lazy";
+      const label = document.createElement("span");
+      label.textContent = icon.name;
+      button.append(image, label);
+      button.addEventListener("click", async () => {
+        await this._saveItemIcon(icon.path);
+        dialog.close();
+      });
+      grid.append(button);
+    }
+
+    search.addEventListener("input", () => {
+      const query = search.value.trim().toLocaleLowerCase(game.i18n.lang || undefined);
+      grid.querySelectorAll("button").forEach(button => {
+        const name = (button.dataset.iconName || "").toLocaleLowerCase(game.i18n.lang || undefined);
+        button.hidden = Boolean(query) && !name.includes(query);
+      });
+    });
+
+    panel.append(header, toolbar, grid);
+    dialog.append(panel);
+    dialog.addEventListener("click", event => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("close", () => dialog.remove(), { once: true });
+    document.body.append(dialog);
+    dialog.showModal();
+    search.focus();
+  }
+
+  /** Persist the inventory SVG and keep the two sheet previews in sync. */
+  async _saveItemIcon(iconPath) {
+    try {
+      await this.document.update({ "system.icon": iconPath });
+      const previewPath = iconPath || this.document.img;
+      this.element.querySelectorAll("[data-item-icon-preview]").forEach(image => {
+        image.src = previewPath;
+      });
+      this.element.querySelectorAll("[data-action='selectItemIcon']").forEach(button => {
+        const selected = (button.dataset.iconPath || "") === iconPath;
+        button.classList.toggle("selected", selected);
+        button.setAttribute("aria-pressed", String(selected));
+      });
+    } catch (error) {
+      console.error("HowToBeAHero | Could not update item SVG icon:", error);
+      ui.notifications.error(game.i18n.localize("HTBAH.ItemIconSaveFailed"));
+      throw error;
+    }
+  }
+
+  /**
+   * Save a selected library SVG to the item's system.icon field.
+   * An empty path restores the normal Item image in the inventory.
+   */
+  async _onSelectItemIcon(event, target) {
+    event.preventDefault();
+    if (!this.isEditable) {
+      ui.notifications.warn(game.i18n.localize("HTBAH.ItemEditPermissionDenied"));
+      return;
+    }
+
+    const requestedPath = target.dataset.iconPath || "";
+    const allowedIcon = requestedPath
+      ? this._getAvailableIcons(this.document.type).find(icon => icon.path === requestedPath)
+      : null;
+
+    if (requestedPath && !allowedIcon) {
+      ui.notifications.warn(game.i18n.localize("HTBAH.ItemIconInvalid"));
+      return;
+    }
+
+    const iconPath = allowedIcon?.path ?? "";
+    await this._saveItemIcon(iconPath);
+  }
+
+  /**
    * Handle portrait display or editing
    */
   _onShowPortrait(event, target) {
@@ -315,8 +501,11 @@ export class HowToBeAHeroItemSheet extends HandlebarsApplicationMixin(foundry.ap
       const fp = new foundry.applications.apps.FilePicker.implementation({
         type: "image",
         current: img,
-        callback: (path) => {
-          this.document.update({ img: path });
+        callback: async (path) => {
+          await this.document.update({ img: path });
+          if (!this.document.system?.icon) {
+            this.element.querySelectorAll("[data-item-icon-preview]").forEach(image => { image.src = path; });
+          }
         }
       });
       fp.render(true);

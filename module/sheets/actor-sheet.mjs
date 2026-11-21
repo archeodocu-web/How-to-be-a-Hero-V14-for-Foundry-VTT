@@ -1,6 +1,7 @@
 import { HowToBeAHeroActor } from '../documents/actor.mjs';
 import { HowToBeAHeroDragDropHandler } from '../helpers/drag-drop-handler.mjs';
 import { initializeCustomElements } from '../components/_module.mjs';
+import { ITEM_ICON_CATALOG } from '../helpers/item-icons.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -77,308 +78,7 @@ class TabsHtbah {
 /**
  * Item creation dialog with type and local SVG icon selection.
  */
-const ITEM_ICON_CATALOG = [
-  {
-    "type": "weapon",
-    "name": "Schwert",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/sword.svg",
-    "slug": "sword"
-  },
-  {
-    "type": "weapon",
-    "name": "Dolch",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/dagger.svg",
-    "slug": "dagger"
-  },
-  {
-    "type": "weapon",
-    "name": "Pistole",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/pistol.svg",
-    "slug": "pistol"
-  },
-  {
-    "type": "weapon",
-    "name": "Revolver",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/revolver.svg",
-    "slug": "revolver"
-  },
-  {
-    "type": "weapon",
-    "name": "Bogen",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/bow.svg",
-    "slug": "bow"
-  },
-  {
-    "type": "weapon",
-    "name": "Axt",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/axe.svg",
-    "slug": "axe"
-  },
-  {
-    "type": "weapon",
-    "name": "Speer",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/spear.svg",
-    "slug": "spear"
-  },
-  {
-    "type": "weapon",
-    "name": "Streitkolben",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/mace.svg",
-    "slug": "mace"
-  },
-  {
-    "type": "weapon",
-    "name": "Armbrust",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/crossbow.svg",
-    "slug": "crossbow"
-  },
-  {
-    "type": "weapon",
-    "name": "Pfeil",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/arrow.svg",
-    "slug": "arrow"
-  },
-  {
-    "type": "weapon",
-    "name": "Rapier",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/rapier.svg",
-    "slug": "rapier"
-  },
-  {
-    "type": "weapon",
-    "name": "Kriegshammer",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/war-hammer.svg",
-    "slug": "war-hammer"
-  },
-  {
-    "type": "weapon",
-    "name": "Muskete",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/musket.svg",
-    "slug": "musket"
-  },
-  {
-    "type": "weapon",
-    "name": "Messer",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/knife.svg",
-    "slug": "knife"
-  },
-  {
-    "type": "weapon",
-    "name": "Schleuder",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/slingshot.svg",
-    "slug": "slingshot"
-  },
-  {
-    "type": "consumable",
-    "name": "Trank",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/potion.svg",
-    "slug": "potion"
-  },
-  {
-    "type": "consumable",
-    "name": "Phiole",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/vial.svg",
-    "slug": "vial"
-  },
-  {
-    "type": "consumable",
-    "name": "Kolben",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/flask.svg",
-    "slug": "flask"
-  },
-  {
-    "type": "consumable",
-    "name": "Reagenzglas",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/test-tube.svg",
-    "slug": "test-tube"
-  },
-  {
-    "type": "consumable",
-    "name": "Heilpflanze",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/herb.svg",
-    "slug": "herb"
-  },
-  {
-    "type": "consumable",
-    "name": "Verband",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/bandage.svg",
-    "slug": "bandage"
-  },
-  {
-    "type": "consumable",
-    "name": "Brot",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/bread.svg",
-    "slug": "bread"
-  },
-  {
-    "type": "consumable",
-    "name": "Flasche",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/bottle.svg",
-    "slug": "bottle"
-  },
-  {
-    "type": "consumable",
-    "name": "Gegengift",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/antidote.svg",
-    "slug": "antidote"
-  },
-  {
-    "type": "consumable",
-    "name": "Proviant",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/food.svg",
-    "slug": "food"
-  },
-  {
-    "type": "armor",
-    "name": "Schild",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/shield.svg",
-    "slug": "shield"
-  },
-  {
-    "type": "armor",
-    "name": "Helm",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/helmet.svg",
-    "slug": "helmet"
-  },
-  {
-    "type": "armor",
-    "name": "Brustpanzer",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/chest-armor.svg",
-    "slug": "chest-armor"
-  },
-  {
-    "type": "armor",
-    "name": "Handschuh",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/gauntlet.svg",
-    "slug": "gauntlet"
-  },
-  {
-    "type": "armor",
-    "name": "Stiefel",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/boots.svg",
-    "slug": "boots"
-  },
-  {
-    "type": "armor",
-    "name": "Lederrüstung",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/leather-armor.svg",
-    "slug": "leather-armor"
-  },
-  {
-    "type": "armor",
-    "name": "Kettenrüstung",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/chainmail.svg",
-    "slug": "chainmail"
-  },
-  {
-    "type": "armor",
-    "name": "Umhang",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/cloak.svg",
-    "slug": "cloak"
-  },
-  {
-    "type": "tool",
-    "name": "Hammer",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/hammer-tool.svg",
-    "slug": "hammer-tool"
-  },
-  {
-    "type": "tool",
-    "name": "Schraubenschlüssel",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/wrench.svg",
-    "slug": "wrench"
-  },
-  {
-    "type": "tool",
-    "name": "Zange",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/pliers.svg",
-    "slug": "pliers"
-  },
-  {
-    "type": "tool",
-    "name": "Säge",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/saw.svg",
-    "slug": "saw"
-  },
-  {
-    "type": "tool",
-    "name": "Schere",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/scissors.svg",
-    "slug": "scissors"
-  },
-  {
-    "type": "tool",
-    "name": "Dietrich",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/lockpick.svg",
-    "slug": "lockpick"
-  },
-  {
-    "type": "tool",
-    "name": "Zange",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/tongs.svg",
-    "slug": "tongs"
-  },
-  {
-    "type": "tool",
-    "name": "Laterne",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/lantern.svg",
-    "slug": "lantern"
-  },
-  {
-    "type": "item",
-    "name": "Schlüssel",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/key.svg",
-    "slug": "key"
-  },
-  {
-    "type": "item",
-    "name": "Schriftrolle",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/scroll.svg",
-    "slug": "scroll"
-  },
-  {
-    "type": "item",
-    "name": "Brief",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/letter.svg",
-    "slug": "letter"
-  },
-  {
-    "type": "item",
-    "name": "Buch",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/book.svg",
-    "slug": "book"
-  },
-  {
-    "type": "item",
-    "name": "Karte",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/map.svg",
-    "slug": "map"
-  },
-  {
-    "type": "item",
-    "name": "Münze",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/coin.svg",
-    "slug": "coin"
-  },
-  {
-    "type": "item",
-    "name": "Beutel",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/pouch.svg",
-    "slug": "pouch"
-  },
-  {
-    "type": "item",
-    "name": "Ring",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/ring.svg",
-    "slug": "ring"
-  },
-  {
-    "type": "item",
-    "name": "Edelstein",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/gem.svg",
-    "slug": "gem"
-  }
-];
+
 
 class NameInputDialog extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
   constructor({ defaultName = "", onSubmit, initialType = "", itemPicker = true } = {}) {
@@ -423,17 +123,22 @@ class NameInputDialog extends foundry.applications.api.HandlebarsApplicationMixi
 
     const categoryButtons = this.element.querySelectorAll('[data-item-type]');
     const iconButtons = this.element.querySelectorAll('[data-icon-path]');
+    const iconSearch = this.element.querySelector('[data-create-icon-search]');
     const updateSelection = () => {
+      const query = (iconSearch?.value || '').trim().toLocaleLowerCase(game.i18n.lang || undefined);
       categoryButtons.forEach(button => button.classList.toggle("active", button.dataset.itemType === this.selectedType));
       iconButtons.forEach(button => {
-        const visible = button.dataset.iconType === this.selectedType;
-        button.hidden = !visible;
+        const name = (button.dataset.iconName || button.getAttribute('aria-label') || '').toLocaleLowerCase(game.i18n.lang || undefined);
+        const typeMatches = button.dataset.iconType === this.selectedType;
+        const searchMatches = !query || name.includes(query);
+        button.hidden = !(typeMatches && searchMatches);
         button.classList.toggle("selected", button.dataset.iconPath === this.selectedIcon);
         button.setAttribute("aria-pressed", String(button.dataset.iconPath === this.selectedIcon));
       });
     };
     categoryButtons.forEach(button => button.addEventListener("click", () => {
       this.selectedType = button.dataset.itemType;
+      if (iconSearch) iconSearch.value = "";
       const firstIcon = ITEM_ICON_CATALOG.find(icon => icon.type === this.selectedType);
       this.selectedIcon = firstIcon?.path ?? "";
       updateSelection();
@@ -442,6 +147,7 @@ class NameInputDialog extends foundry.applications.api.HandlebarsApplicationMixi
       this.selectedIcon = button.dataset.iconPath;
       updateSelection();
     }));
+    iconSearch?.addEventListener("input", updateSelection);
     updateSelection();
   }
 
@@ -490,6 +196,7 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
       createDocument: this.prototype._onCreateDocument,
       rollSkillSet: this.prototype._onRollSkillSet,
       itemAction: this.prototype._onItemAction,
+      useMagic: this.prototype._onUseMagic,
       effectAction: this.prototype._onEffectAction,
       removeFavorite: this.prototype._onRemoveFavorite,
       showPortrait: this.prototype._onShowPortrait,
@@ -523,6 +230,7 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
     { tab: "details", label: "HTBAH.Details", icon: "fas fa-cog" },
     { tab: "inventory", label: "HTBAH.Inventory", svg: "hand-bag" },
     { tab: "effects", label: "HTBAH.Effects", icon: "fas fa-bolt" },
+    { tab: "magic", label: "HTBAH.Magic.Title", icon: "fas fa-wand-magic-sparkles" },
     { tab: "biography", label: "HTBAH.Biography", icon: "fas fa-feather" }
   ];
 
@@ -904,9 +612,11 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
     // Update create child button
     const createChild = this.element.querySelector(".create-child");
     if (createChild) {
-      createChild.setAttribute("aria-label", game.i18n.format("SIDEBAR.Create", {
-        type: game.i18n.localize(`DOCUMENT.${tabName === "effects" ? "ActiveEffect" : "Item"}`)
-      }));
+      const createMagic = tabName === "magic";
+      createChild.dataset.type = createMagic ? "magic" : "item";
+      createChild.hidden = !["inventory", "magic"].includes(tabName);
+      const typeLabel = createMagic ? game.i18n.localize("HTBAH.Magic.Ability") : game.i18n.localize(`DOCUMENT.${tabName === "effects" ? "ActiveEffect" : "Item"}`);
+      createChild.setAttribute("aria-label", game.i18n.format("SIDEBAR.Create", { type: typeLabel }));
     }
     
   }
@@ -1095,6 +805,7 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
     const armors = [];
     const tools = [];
     const abilities = [];
+    const magicAbilities = [];
 
     for (const item of allItems) {
       item.img ||= Item.DEFAULT_ICON;
@@ -1121,6 +832,9 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
         case "ability":
           abilities.push(item);
           break;
+        case "magic":
+          magicAbilities.push(item);
+          break;
       }
     }
 
@@ -1132,6 +846,7 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
     context.armors = armors;
     context.tools = tools;
     context.abilities = abilities;
+    context.magicAbilities = magicAbilities.sort((a, b) => (a.sort || 0) - (b.sort || 0));
 
     // Create sections array for use in the template
     context.sections = [
@@ -1165,14 +880,6 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
         title: isEquipped ? "HTBAH.Unequip" : "HTBAH.Equip",
         disabled: false
       };
-    }
-
-    // Prepare uses context
-    if (item.system.uses) {
-      ctx.hasUses = true;
-      ctx.uses = item.system.uses;
-    } else {
-      ctx.hasUses = false;
     }
 
     // Prepare rollable context - abilities are always rollable, others need rollable property set to true
@@ -1624,6 +1331,19 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
     }
   }
 
+  /** Use a magic ability and publish its usage to chat. */
+  async _onUseMagic(event, target) {
+    event.preventDefault();
+    const itemId = target.closest("[data-item-id]")?.dataset.itemId || target.dataset.itemId;
+    const item = this.document.items.get(itemId);
+    if (!item || item.type !== "magic") return;
+    if (!game.user.isGM && !this.document.isOwner) {
+      ui.notifications.warn(game.i18n.localize("HTBAH.ApplyDamageNoPermission"));
+      return;
+    }
+    return item.useMagic();
+  }
+
   /**
    * Handle effect actions
    */
@@ -1785,11 +1505,19 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
         defaultName: "",
         initialType: chooseItemType ? "" : requestedType,
         itemPicker: chooseItemType,
-        onSubmit: selection => {
+        onSubmit: async selection => {
           const data = chooseItemType
             ? { name: selection.name, type: selection.type, system: { ...systemData, icon: selection.icon } }
             : { name: selection, type: requestedType, system: systemData };
-          resolve(this.document.createEmbeddedDocuments(documentClass, [data]));
+          try {
+            const created = await this.document.createEmbeddedDocuments(documentClass, [data]);
+            if (requestedType === "magic" && created[0]) created[0].sheet.render(true);
+            resolve(created);
+          } catch (error) {
+            console.error("HowToBeAHero | Could not create child document:", error);
+            ui.notifications.error(game.i18n.localize("HTBAH.Magic.CreateFailed"));
+            resolve([]);
+          }
         }
       });
       dialog.render(true);

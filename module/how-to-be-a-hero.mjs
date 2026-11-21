@@ -19,6 +19,10 @@ import { Tooltips } from './helpers/tooltips.mjs';
 import { HOW_TO_BE_A_HERO } from './helpers/config.mjs';
 import { registerSystemSettings, enforceDarkMode } from './helpers/settings.mjs';
 import { registerDamageApplicationContextMenu } from "./helpers/damage-application.mjs";
+
+// Register chat context hooks at module load, before the core ChatLog builds
+// its ApplicationV2 context menu during startup.
+registerDamageApplicationContextMenu();
 // Import DataModel classes
 import * as models from './data/_module.mjs';
 // Import Dice class
@@ -43,9 +47,6 @@ var _module$c = /*#__PURE__*/Object.freeze({
 /* -------------------------------------------- */
 
 Hooks.once('init', function () {
-
-  // Register before the ChatLog builds its AppV2 context menu on first render.
-  registerDamageApplicationContextMenu();
 
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
@@ -156,8 +157,11 @@ Hooks.once('init', function () {
     weapon: models.HowToBeAHeroWeapon,
     armor: models.HowToBeAHeroArmor,
     tool: models.HowToBeAHeroTool,
-    ability: models.HowToBeAHeroAbility
+    ability: models.HowToBeAHeroAbility,
+    magic: models.HowToBeAHeroMagic
   }
+  CONFIG.Item.typeLabels ??= {};
+  CONFIG.Item.typeLabels.magic = "HTBAH.MagicAbility";
   
   // Verify that all data models are defined
   for (let [key, model] of Object.entries(CONFIG.Actor.dataModels)) {
