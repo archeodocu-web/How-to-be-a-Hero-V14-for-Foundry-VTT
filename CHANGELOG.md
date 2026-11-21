@@ -1,9 +1,3 @@
-## 1.1.9
-- Fix: register the Apply Damage chat context action at module load, before the ChatLog creates its context menu.
-- Fix: bind rendered chat message elements to their ChatMessage documents for reliable context-menu lookup.
-- Feature: snapshot the targeted actor UUIDs into weapon damage messages and apply damage to the target of that attack.
-- Fix: use calculated equipped armor values as well as manually stored armor values when reducing damage.
-
 ## 1.1.8
 - Corrected the Combat Tracker initiative formula to use the same derived Action modifier as character-sheet initiative rolls.
 - Registered the armor-aware chat damage action during system initialization so it is available when the ChatLog constructs its context menu.
