@@ -1,3 +1,8 @@
-2026/11/21-09:31:10.843 392c Recovering log #105
-2026/11/21-09:31:10.848 392c Delete type=0 #105
-2026/11/21-09:31:10.848 392c Delete type=3 #103
+2026/11/21-15:15:38.366 1fac Log #101: 0 ops saved to Table #159 OK
+2026/11/21-15:15:38.366 1fac Archiving G:\Pen & Paper\Foundry\FoundryVTT\Data\systems\how-to-be-a-hero\packs\rules/000101.log: OK
+2026/11/21-15:15:38.366 1fac Log #156: 0 ops saved to Table #160 OK
+2026/11/21-15:15:38.366 1fac Archiving G:\Pen & Paper\Foundry\FoundryVTT\Data\systems\how-to-be-a-hero\packs\rules/000156.log: OK
+2026/11/21-15:15:38.366 1fac Table #5: 6 entries OK
+2026/11/21-15:15:38.366 1fac Table #158: 6 entries OK
+2026/11/21-15:15:38.370 1fac Archiving G:\Pen & Paper\Foundry\FoundryVTT\Data\systems\how-to-be-a-hero\packs\rules/MANIFEST-000154: OK
+2026/11/21-15:15:38.370 1fac **** Repaired leveldb G:\Pen & Paper\Foundry\FoundryVTT\Data\systems\how-to-be-a-hero\packs\rules; recovered 2 files; 16592 bytes. Some data may have been lost. ****
