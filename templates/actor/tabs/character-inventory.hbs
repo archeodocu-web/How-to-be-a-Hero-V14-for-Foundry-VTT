@@ -26,7 +26,6 @@
                         </div>
                     </div>
                     <div class="item-header item-quantity">{{ localize "HTBAH.Quantity" }}</div>
-                    <div class="item-header item-uses">{{ localize "HTBAH.Uses" }}</div>
                     <div class="item-header item-controls"></div>
                 </div>
 
@@ -62,18 +61,6 @@
                             <a class="adjustment-button" data-action="adjustQuantity" data-direction="increase" data-property="system.quantity">
                                 <i class="fas fa-plus"></i>
                             </a>
-                            {{/if}}
-                        </div>
-
-                        <div class="item-detail item-uses">
-                            {{#if ctx.hasUses}}
-                            <input type="text" value="{{system.uses.value}}" min="0" max="{{system.uses.max}}"
-                                placeholder="0" data-dtype="Number" inputmode="numeric" pattern="[0-9+=\-]*"
-                                data-name="system.uses.value"
-                                {{#unless @root.owner}}readonly{{/unless}}>
-                            / {{system.uses.max}}
-                            {{else}}
-                            <span class="no-uses">-</span>
                             {{/if}}
                         </div>
 

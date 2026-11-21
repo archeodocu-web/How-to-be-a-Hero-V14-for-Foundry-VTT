@@ -1,0 +1,43 @@
+<section class="magic-tab">
+  <header class="magic-tab__mana">
+    <div>
+      <h2>{{localize "HTBAH.Magic.Title"}}</h2>
+      <p>{{localize "HTBAH.Magic.ManaPool"}}</p>
+    </div>
+    <strong>{{actor.system.attributes.mana.value}} / {{actor.system.attributes.mana.max}}</strong>
+  </header>
+  <div class="magic-tab__mana-track"><span style="width:{{manaPercentage}}%"></span></div>
+
+  {{#if magicAbilities.length}}
+    <div class="magic-ability-list">
+      {{#each magicAbilities as |ability|}}
+        <article class="magic-ability-card" data-item-id="{{ability.id}}">
+          <div class="magic-ability-card__icon">
+            <img src="{{#if ability.system.icon}}{{ability.system.icon}}{{else}}{{ability.img}}{{/if}}" alt="" />
+          </div>
+          <div class="magic-ability-card__details">
+            <h3>{{ability.name}}</h3>
+            {{#if ability.system.description}}<p>{{{ability.system.description}}}</p>{{/if}}
+            <div class="magic-ability-card__meta">
+              <span>{{localize "HTBAH.Magic.ManaCostShort"}}: {{ability.system.manaCost}}</span>
+              {{#if ability.system.rollable}}<span>{{localize "HTBAH.Magic.Rollable"}}</span>{{/if}}
+              {{#if (eq ability.system.effectType "armor")}}<span>+{{ability.system.effectValue}} {{localize "HTBAH.ArmorClass"}}</span>{{/if}}
+              {{#if ability.system.durationRounds}}<span>{{ability.system.durationRounds}} {{localize "HTBAH.Magic.Rounds"}}</span>{{/if}}
+            </div>
+          </div>
+          <div class="magic-ability-card__actions">
+            <button type="button" class="magic-use-button" data-action="useMagic" data-item-id="{{ability.id}}">
+              <i class="fas fa-wand-magic-sparkles"></i> {{localize "HTBAH.Magic.Use"}}
+            </button>
+            {{#if @root.editable}}
+              <button type="button" data-action="itemAction" data-sub-action="edit" data-item-id="{{ability.id}}" title="{{localize 'HTBAH.ItemEdit'}}"><i class="fas fa-edit"></i></button>
+              <button type="button" data-action="itemAction" data-sub-action="delete" data-item-id="{{ability.id}}" title="{{localize 'HTBAH.ItemDelete'}}"><i class="fas fa-trash"></i></button>
+            {{/if}}
+          </div>
+        </article>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="magic-tab__empty">{{localize "HTBAH.Magic.Empty"}}</div>
+  {{/if}}
+</section>

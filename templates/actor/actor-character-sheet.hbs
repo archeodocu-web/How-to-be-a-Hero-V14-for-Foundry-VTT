@@ -379,6 +379,11 @@
           {{> "htbah.character-inventory" }}
         </div>
 
+        {{!-- Magic Tab --}}
+        <div class="tab magic {{#if (eq activeTab "magic")}}active{{/if}}" data-group="primary" data-tab="magic">
+          {{> "htbah.character-magic" }}
+        </div>
+
         {{!-- Effects Tab --}}
         <div class="tab effects {{#if (eq activeTab "effects")}}active{{/if}}" data-group="primary" data-tab="effects">
           {{> "htbah.character-effects" }}

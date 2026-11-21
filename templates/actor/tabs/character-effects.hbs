@@ -29,14 +29,15 @@
                         <div class="name name-stacked">
                             <span class="title">{{ name }}</span>
                         </div>
-                        {{#if duration.remaining}}
+                        {{#if duration.label}}
                         <div class="duration">
                             <i class="fas fa-clock"></i>
-                            <span class="most-significant">{{ durationParts.[0] }}</span>
-                            {{#if durationParts.[1]}}
-                            <span class="separator">&vert;</span>
-                            <span class="least-significant">{{ durationParts.[1] }}</span>
-                            {{/if}}
+                            <span>{{ duration.label }}</span>
+                        </div>
+                        {{else if duration.rounds}}
+                        <div class="duration">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ duration.rounds }} {{ localize "HTBAH.Magic.Rounds" }}</span>
                         </div>
                         {{/if}}
                     </div>

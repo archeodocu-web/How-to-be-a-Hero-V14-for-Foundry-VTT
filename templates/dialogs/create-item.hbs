@@ -11,9 +11,11 @@
 
   <div class="htbah-create-icons">
     <h3>{{localize "HTBAH.SelectItemIcon"}}</h3>
+    <input type="search" class="htbah-icon-search" data-create-icon-search
+           placeholder="{{localize 'HTBAH.SearchIcons'}}" aria-label="{{localize 'HTBAH.SearchIcons'}}">
     <div class="htbah-icon-grid">
       {{#each iconCatalog}}
-      <button type="button" class="htbah-icon-choice" data-icon-type="{{type}}" data-icon-path="{{path}}" title="{{name}}" aria-label="{{name}}" aria-pressed="false">
+      <button type="button" class="htbah-icon-choice" data-icon-type="{{type}}" data-icon-path="{{path}}" data-icon-name="{{name}}" title="{{name}}" aria-label="{{name}}" aria-pressed="false">
         <img src="{{path}}" alt="" loading="lazy">
         <span>{{name}}</span>
       </button>
