@@ -138,9 +138,6 @@ export class HowToBeAHeroActor extends Actor {
     const critical = damageData.critical || false;
     const bonusValue = damageData.bonus || 0;
     const target = damageData.target || null;
-    const targetActorUuids = Array.from(game.user.targets || [])
-      .map(token => token?.actor?.uuid)
-      .filter(uuid => typeof uuid === "string" && uuid.length > 0);
     const flavor = game.i18n.localize("HTBAH.DamageRollPrompt");
     
     // Use the formula from damageData if provided, otherwise default to 1d10
@@ -161,10 +158,7 @@ export class HowToBeAHeroActor extends Actor {
         speaker: options.speaker || ChatMessage.getSpeaker({actor: this}),
         flags: {
           howtobeahero: {
-            roll: {
-            type: "damage",
-            data: { ...damageData, targetActorUuids }
-          }
+            roll: { type: "damage", data: damageData }
           }
         }
       }

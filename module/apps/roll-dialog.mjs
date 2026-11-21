@@ -224,10 +224,6 @@ export class HowToBeAHeroRollDialog extends HandlebarsApplicationMixin(foundry.a
       // Create customized chat message based on item type
       const messageContent = await HowToBeAHeroRollDialog._createChatMessage(this.item, roll, rollFormula, this.bonus, this.isParry);
       
-      const targetActorUuids = Array.from(game.user.targets || [])
-        .map(token => token?.actor?.uuid)
-        .filter(uuid => typeof uuid === "string" && uuid.length > 0);
-
       const messageData = {
         user: game.user.id,
         speaker: ChatMessage.getSpeaker(),
@@ -239,8 +235,7 @@ export class HowToBeAHeroRollDialog extends HandlebarsApplicationMixin(foundry.a
               damage: {
                 amount: Math.max(0, Number(roll.total) || 0),
                 formula: rollFormula,
-                itemName: this.item.name,
-                targetActorUuids
+                itemName: this.item.name
               }
             }
           }

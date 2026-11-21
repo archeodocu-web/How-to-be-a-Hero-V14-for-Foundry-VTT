@@ -133,8 +133,7 @@ export async function d10Roll({
     foundry.utils.setProperty(messageData, "flags.howtobeahero.damage", {
       amount: Math.max(0, Number(roll.total) || 0),
       formula,
-      source: damageRollFlag.data?.label || flavor || "",
-      targetActorUuids: damageRollFlag.data?.targetActorUuids || []
+      source: damageRollFlag.data?.label || flavor || ""
     });
   }
 

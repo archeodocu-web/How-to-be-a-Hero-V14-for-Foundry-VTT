@@ -1,34 +1,11 @@
 /**
- * Apply weapon damage from a ChatLog message to the token targeted when the
- * attack was rolled (falling back to currently targeted tokens for older rolls).
+ * Damage application from weapon damage rolls in the ChatLog.
+ * A single targeted token is required to avoid applying damage to the wrong actor.
  */
-const renderedChatMessages = new WeakMap();
-let damageContextMenuRegistered = false;
-
 function getMessageFromEntry(element) {
-  if (!element) return null;
-
-  const candidates = [];
-  if (typeof element.closest === "function") {
-    const closest = element.closest("[data-message-id], .chat-message, .message");
-    if (closest) candidates.push(closest);
-  }
-  candidates.push(element);
-
-  for (const candidate of candidates) {
-    const renderedMessage = renderedChatMessages.get(candidate);
-    if (renderedMessage) return renderedMessage;
-
-    const messageId = candidate.dataset?.messageId
-      || candidate.getAttribute?.("data-message-id")
-      || candidate.dataset?.messageid;
-    if (messageId) {
-      const message = game.messages.get(messageId);
-      if (message) return message;
-    }
-  }
-
-  return null;
+  const entry = element?.closest?.("[data-message-id]") || element;
+  const messageId = entry?.dataset?.messageId;
+  return messageId ? game.messages.get(messageId) : null;
 }
 
 function getDamageAmount(message) {
@@ -36,9 +13,7 @@ function getDamageAmount(message) {
 
   const damageFlag = message.getFlag("howtobeahero", "damage");
   const flaggedAmount = Number(damageFlag?.amount);
-  if (damageFlag?.amount !== undefined && Number.isFinite(flaggedAmount) && flaggedAmount >= 0) {
-    return flaggedAmount;
-  }
+  if (Number.isFinite(flaggedAmount) && flaggedAmount >= 0) return flaggedAmount;
 
   // Compatibility for damage rolls created through Actor.rollDamage().
   const rollFlag = message.getFlag("howtobeahero", "roll");
@@ -51,37 +26,6 @@ function getDamageAmount(message) {
   return null;
 }
 
-function getStoredTargetActorUuids(message) {
-  const damageFlag = message?.getFlag("howtobeahero", "damage");
-  const rollFlag = message?.getFlag("howtobeahero", "roll");
-  const uuids = damageFlag?.targetActorUuids ?? rollFlag?.data?.targetActorUuids;
-  return Array.isArray(uuids) ? [...new Set(uuids.filter(uuid => typeof uuid === "string" && uuid.length))] : [];
-}
-
-async function getTargetActors(message) {
-  const storedUuids = getStoredTargetActorUuids(message);
-
-  // Prefer the target snapshot saved when the damage roll was created.
-  if (storedUuids.length) {
-    const documents = await Promise.all(storedUuids.map(async uuid => {
-      try {
-        return await fromUuid(uuid);
-      } catch (error) {
-        console.warn(`HowToBeAHero | Could not resolve saved damage target ${uuid}`, error);
-        return null;
-      }
-    }));
-    return [...new Map(documents.filter(document => document?.documentName === "Actor")
-      .map(actor => [actor.uuid, actor])).values()];
-  }
-
-  // Compatibility for older damage messages which predate target snapshots.
-  const currentlyTargetedActors = Array.from(game.user.targets || [])
-    .map(token => token?.actor)
-    .filter(Boolean);
-  return [...new Map(currentlyTargetedActors.map(actor => [actor.uuid, actor])).values()];
-}
-
 async function applyDamageFromMessage(message) {
   const damage = getDamageAmount(message);
   if (damage === null) {
@@ -89,7 +33,7 @@ async function applyDamageFromMessage(message) {
     return;
   }
 
-  const targets = await getTargetActors(message);
+  const targets = Array.from(game.user.targets || []).filter(token => token?.actor);
   if (targets.length === 0) {
     ui.notifications.warn(game.i18n.localize("HTBAH.ApplyDamageNoTarget"));
     return;
@@ -99,7 +43,8 @@ async function applyDamageFromMessage(message) {
     return;
   }
 
-  const actor = targets[0];
+  const target = targets[0];
+  const actor = target.actor;
   if (!game.user.isGM && !actor.isOwner) {
     ui.notifications.warn(game.i18n.localize("HTBAH.ApplyDamageNoPermission"));
     return;
@@ -112,17 +57,9 @@ async function applyDamageFromMessage(message) {
     return;
   }
 
-  // Character armor is calculated from equipped armor items; NPC armor can
-  // also be entered directly in system.attributes.armor.value. Use whichever
-  // populated value is higher so the default zero field does not mask armorData.
-  const calculatedArmor = Number(actor.armorData?.total);
-  const storedArmor = Number(actor.system?.attributes?.armor?.value);
-  const armor = Math.max(
-    0,
-    Number.isFinite(calculatedArmor) ? calculatedArmor : 0,
-    Number.isFinite(storedArmor) ? storedArmor : 0
-  );
-
+  // Characters derive this value from equipped armor; NPCs can enter it manually.
+  const armorValue = Number(actor.system?.attributes?.armor?.value ?? actor.armorData?.total ?? 0);
+  const armor = Number.isFinite(armorValue) ? Math.max(0, armorValue) : 0;
   const rawDamage = Math.max(0, Math.round(damage));
   const appliedDamage = Math.max(0, rawDamage - armor);
   const newHP = Math.max(0, currentHP - appliedDamage);
@@ -155,64 +92,22 @@ async function applyDamageFromMessage(message) {
   }));
 }
 
-/**
- * Register the chat context-menu entry before the ChatLog's first render.
- * The render hook also binds the ChatMessage document to its DOM element so
- * context-menu callbacks do not depend on a particular chat template shape.
- */
+/** Register the ChatLog context-menu entry for damage messages. */
+let damageContextMenuRegistered = false;
+
 export function registerDamageApplicationContextMenu() {
   if (damageContextMenuRegistered) return;
-  if (!globalThis.Hooks?.on) {
-    console.error("HowToBeAHero | Hooks API is unavailable; damage context menu was not registered.");
-    return;
-  }
-
   damageContextMenuRegistered = true;
 
-  Hooks.on("renderChatMessageHTML", (message, html) => {
-    const root = html instanceof HTMLElement ? html : html?.[0];
-    if (!(root instanceof HTMLElement) || !message) return;
-
-    root.dataset.messageId = message.id;
-    renderedChatMessages.set(root, message);
-    if (getDamageAmount(message) !== null) {
-      root.dataset.htbahDamageMessage = "true";
-    } else {
-      delete root.dataset.htbahDamageMessage;
-    }
-  });
-
   Hooks.on("getChatMessageContextOptions", (_application, menuItems) => {
-    if (!Array.isArray(menuItems)) {
-      console.warn("HowToBeAHero | Chat message context hook did not provide a menu item array.");
-      return;
-    }
-
-    // Avoid duplicate entries if the hook is re-fired by a popout ChatLog.
-    if (menuItems.some(entry => entry.classes?.split?.(" ").includes("htbah-apply-damage"))) return;
-
     menuItems.push({
       label: game.i18n.localize("HTBAH.ApplyDamage"),
       icon: "fa-solid fa-shield-heart",
-      classes: "htbah-apply-damage",
-      visible: target => {
-        const message = getMessageFromEntry(target);
-        return message ? getDamageAmount(message) !== null
-          : target?.closest?.('[data-htbah-damage-message="true"]') !== null;
-      },
-      onClick: async (_event, target) => {
-        const message = getMessageFromEntry(target);
-        if (!message) {
-          ui.notifications.warn(game.i18n.localize("HTBAH.ApplyDamageInvalidMessage"));
-          console.warn("HowToBeAHero | Could not resolve the ChatMessage for the damage context action.", target);
-          return;
-        }
+      visible: element => getDamageAmount(getMessageFromEntry(element)) !== null,
+      onClick: (_event, element) => {
+        const message = getMessageFromEntry(element);
         return applyDamageFromMessage(message);
       }
     });
-
-    console.debug("HowToBeAHero | Registered Apply Damage chat context entry.");
   });
-
-  console.info("HowToBeAHero | Damage chat context hooks registered.");
 }
