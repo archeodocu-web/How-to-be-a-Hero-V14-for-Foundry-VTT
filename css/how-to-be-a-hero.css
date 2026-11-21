@@ -3700,9 +3700,11 @@ item-list-controls search .filter-control:hover:not(.disabled),
 }
 
 /* Show create-child button based on the active tab class on the parent div */
-.how-to-be-a-hero.sheet.actor.character.tab-inventory .create-child {
+.how-to-be-a-hero.sheet.actor.character.tab-inventory .create-child,
+.how-to-be-a-hero.sheet.actor.character.tab-magic .create-child {
   display: block;
 }
+.how-to-be-a-hero.sheet.actor.character .create-child[hidden] { display: none !important; }
 /* Details Tab Styles */
 .how-to-be-a-hero .tab.details {
   /* ----------------------------------------- */
@@ -4308,34 +4310,6 @@ item-list-controls search .filter-control:hover:not(.disabled),
   cursor: pointer;
 }
 
-/* Item Uses Styles */
-.how-to-be-a-hero .tab.inventory .items-section .item-uses {
-  width: 80px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.how-to-be-a-hero .tab.inventory .items-section .item-uses input {
-  width: 40px;
-  text-align: center;
-  background: none;
-  border: none;
-  padding: 0;
-  font-weight: bold;
-  font-size: var(--font-size-16);
-  font-family: var(--htbah-font-roboto-slab);
-  transition: box-shadow 250ms ease;
-}
-
-.how-to-be-a-hero .tab.inventory .items-section .item-uses input:focus-visible,
-.how-to-be-a-hero .tab.inventory .items-section .item-uses input:hover {
-  box-shadow: 0 0 6px var(--htbah-color-gold);
-}
-
-.how-to-be-a-hero .tab.inventory .items-section .item-uses .no-uses {
-  color: var(--htbah-color-gold);
-}
 /* Item Controls Styles */
 .how-to-be-a-hero .tab.inventory .items-section .item-controls {
   width: 90px; /* Increased from 80px to accommodate larger icons */
@@ -4406,9 +4380,8 @@ item-list-controls search .filter-control:hover:not(.disabled),
     flex: 1 0 100%;
   }
 
-  .how-to-be-a-hero .tab.inventory .items-section .item-quantity,
-  .how-to-be-a-hero .tab.inventory .items-section .item-uses {
-    flex: 1;
+  .how-to-be-a-hero .tab.inventory .items-section .item-quantity {
+    flex: 0 0 auto;
   }
 
   .how-to-be-a-hero .tab.inventory .items-section .item-controls {
@@ -4484,7 +4457,7 @@ item-list-controls search .filter-control:hover:not(.disabled),
 /* ---------------------------------- */
 /*  Locked                            */
 /* ---------------------------------- */
-.how-to-be-a-hero .locked .inventory-element .item :is(.item-quantity, .item-uses) input:is(:focus-visible, :hover) {
+.how-to-be-a-hero .locked .inventory-element .item .item-quantity input:is(:focus-visible, :hover) {
   box-shadow: none;
 }
 /* ---------------------------------- */
@@ -4521,6 +4494,11 @@ item-list-controls search .filter-control:hover:not(.disabled),
 
 /* Main container */
 .how-to-be-a-hero.sheet.item .window-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   font-family: var(--htbah-font-roboto);
   color: var(--htbah-color-dark);
   /* ----------------------------------------- */
@@ -4541,19 +4519,19 @@ item-list-controls search .filter-control:hover:not(.disabled),
   background: var(--htbah-sheet-background);
   border-radius: 5px;
   box-shadow: 0 0 10px var(--htbah-shadow-15);
-  min-height: 450px;
-  max-height: 450px;
-  min-width: 570px;
-  max-width: 570px;
+  min-height: min(460px, calc(100vh - 40px));
+  max-height: calc(100vh - 24px);
+  min-width: min(620px, calc(100vw - 32px));
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  transition: min-height 0.3s ease, max-height 0.3s ease;
 }
 
-/* Expanded height when rollable is enabled */
+/* Rollable fields may increase the preferred sheet height without locking it. */
 .how-to-be-a-hero.how-to-be-a-hero.sheet.item.rollable-expanded {
-  min-height: 650px;
-  max-height: 650px;
+  min-height: min(560px, calc(100vh - 40px));
+  max-height: calc(100vh - 24px);
 }
 
 /* Sheet Header */
@@ -5153,9 +5131,8 @@ item-list-controls search .filter-control:hover:not(.disabled),
   gap: clamp(8px, 0.8vw, 12px);
 }
 
-/* Keep quantity and use headings separated and aligned with their columns. */
-.how-to-be-a-hero .tab.inventory .items-section .item-quantity,
-.how-to-be-a-hero .tab.inventory .items-section .item-uses {
+/* Keep the quantity column aligned after removing the Uses column. */
+.how-to-be-a-hero .tab.inventory .items-section .item-quantity {
   flex: 0 0 92px;
   width: 92px;
   min-width: 0;
@@ -5167,8 +5144,7 @@ item-list-controls search .filter-control:hover:not(.disabled),
   gap: 2px;
 }
 
-.how-to-be-a-hero .tab.inventory .items-section .items-header .item-header.item-quantity,
-.how-to-be-a-hero .tab.inventory .items-section .items-header .item-header.item-uses {
+.how-to-be-a-hero .tab.inventory .items-section .items-header .item-header.item-quantity {
   padding: 3px 4px;
   justify-content: center;
   text-align: center;
@@ -5418,4 +5394,268 @@ item-list-controls search .filter-control:hover:not(.disabled),
   background: linear-gradient(90deg, var(--htbah-color-hd-2), var(--htbah-color-maroon));
   outline: 1px solid var(--htbah-color-parchment);
   outline-offset: 1px;
+}
+
+/* Damage action menu attached directly to rendered ChatMessage HTML. */
+.htbah-damage-context-menu {
+  position: fixed;
+  z-index: 100000;
+  min-width: 220px;
+  max-width: min(320px, calc(100vw - 12px));
+  padding: 4px;
+  color: var(--htbah-color-parchment, #f1ebe8);
+  background: var(--htbah-color-dark, #191813);
+  border: 1px solid var(--htbah-color-gold, #9f9275);
+  border-radius: 4px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.55);
+}
+
+.htbah-damage-context-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 10px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  font-family: var(--htbah-font-roboto, Roboto, sans-serif);
+  font-size: 0.9rem;
+  line-height: 1.2;
+  text-align: left;
+  white-space: normal;
+  cursor: pointer;
+}
+
+.htbah-damage-context-menu__item:hover,
+.htbah-damage-context-menu__item:focus-visible {
+  color: #fff;
+  background: var(--htbah-color-maroon, #741b2b);
+  outline: none;
+}
+
+.htbah-damage-context-menu__item i {
+  flex: 0 0 auto;
+  color: var(--htbah-color-gold, #9f9275);
+}
+
+
+/* Existing item editor: choose or replace the inventory SVG icon. */
+.how-to-be-a-hero.sheet.item .htbah-item-icon-editor {
+  min-width: 0;
+  margin-bottom: 0.75rem;
+}
+.how-to-be-a-hero.sheet.item .htbah-item-icon-editor .hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+.how-to-be-a-hero.sheet.item .htbah-item-icon-grid {
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+  max-height: min(240px, 32vh);
+  gap: 0.3rem;
+}
+.how-to-be-a-hero.sheet.item .htbah-item-icon-grid .htbah-icon-choice {
+  min-height: 62px;
+  padding: 0.25rem;
+}
+.how-to-be-a-hero.sheet.item .htbah-item-icon-grid .htbah-icon-choice img {
+  width: 28px;
+  height: 28px;
+}
+.how-to-be-a-hero.sheet.item .htbah-icon-reset {
+  width: 100%;
+  min-height: 2rem;
+  margin-bottom: 0.4rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 5px;
+  background: var(--color-cool-5);
+  color: var(--color-light-1);
+}
+.how-to-be-a-hero.sheet.item .htbah-icon-reset.selected {
+  outline: 2px solid var(--color-warm-2);
+}
+.how-to-be-a-hero.sheet.item .htbah-icon-choice:disabled,
+.how-to-be-a-hero.sheet.item .htbah-icon-reset:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+
+/* Search field for the expanded local SVG item library. */
+.htbah-icon-search {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 0.45rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 4px;
+  background: var(--color-cool-5);
+  color: var(--color-light-1);
+  box-sizing: border-box;
+}
+.htbah-icon-choice[hidden] { display: none !important; }
+.htbah-icon-grid {
+  max-height: min(340px, 40vh);
+  overscroll-behavior: contain;
+}
+
+
+
+.how-to-be-a-hero.sheet.item .window-content > form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+.how-to-be-a-hero.sheet.item .sheet-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+.how-to-be-a-hero.sheet.item .sheet-body .sidebar {
+  flex: 0 0 clamp(165px, 24%, 220px);
+  min-width: 0;
+}
+.how-to-be-a-hero.sheet.item .sheet-body .main-content {
+  min-width: 0;
+  min-height: 0;
+}
+.htbah-item-icon-trigger {
+  flex: 0 0 72px;
+  width: 72px;
+  height: 72px;
+  padding: 3px;
+  margin-right: 14px;
+  border: 1px solid var(--htbah-color-gold);
+  border-radius: 4px;
+  background: #111;
+  cursor: pointer;
+}
+.htbah-item-icon-trigger img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: invert(1);
+}
+.htbah-item-icon-trigger:disabled { opacity: .65; cursor: default; }
+.htbah-item-icon-open,
+.htbah-item-image-open {
+  display: block;
+  width: 100%;
+  min-height: 2.25rem;
+  margin: 0 0 .4rem;
+  padding: .4rem .55rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 4px;
+  background: var(--color-cool-5);
+  color: var(--color-light-1);
+  font-size: .78rem;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.htbah-item-icon-open:hover,
+.htbah-item-image-open:hover { background: var(--color-cool-4); }
+
+/* Native, searchable SVG chooser opened from the item image/header. */
+.htbah-item-icon-picker {
+  width: min(820px, calc(100vw - 36px));
+  max-width: calc(100vw - 36px);
+  height: min(700px, calc(100vh - 36px));
+  max-height: calc(100vh - 36px);
+  padding: 0;
+  border: 1px solid var(--htbah-color-gold, #9f9275);
+  border-radius: 7px;
+  background: var(--htbah-color-beige, #d8d3c2);
+  color: var(--htbah-color-dark, #24232a);
+  box-shadow: 0 12px 40px rgba(0,0,0,.6);
+}
+.htbah-item-icon-picker::backdrop { background: rgba(0,0,0,.72); }
+.htbah-item-icon-picker__panel { display:flex; flex-direction:column; height:100%; min-height:0; padding:.8rem; gap:.65rem; }
+.htbah-item-icon-picker__header { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.2rem .25rem .55rem; border-bottom:1px solid var(--htbah-color-gold,#9f9275); }
+.htbah-item-icon-picker__header h2 { margin:0; font-size:1.2rem; line-height:1.25; }
+.htbah-item-icon-picker__close { flex:0 0 2rem; width:2rem; height:2rem; border:0; border-radius:4px; background:var(--color-cool-5); color:var(--color-light-1); font-size:1.4rem; }
+.htbah-item-icon-picker__toolbar { display:flex; gap:.5rem; align-items:stretch; }
+.htbah-item-icon-picker__search { flex:1 1 auto; min-width:0; padding:.55rem .7rem; border:1px solid var(--htbah-color-tan,#9f9275); border-radius:4px; background:#17161c; color:#fff; }
+.htbah-item-icon-picker__reset { flex:0 0 auto; max-width:42%; padding:.45rem .65rem; border:1px solid var(--color-border-light-primary); border-radius:4px; background:var(--color-cool-5); color:var(--color-light-1); white-space:normal; }
+.htbah-item-icon-picker__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); align-content:start; gap:.45rem; flex:1 1 auto; min-height:0; overflow:auto; padding:.2rem; overscroll-behavior:contain; }
+.htbah-item-icon-picker__grid .htbah-icon-choice { min-height:88px; }
+.htbah-item-icon-picker__grid .htbah-icon-choice img { width:40px; height:40px; object-fit:contain; filter:invert(1); }
+.htbah-item-icon-picker__grid .htbah-icon-choice span { overflow-wrap:anywhere; }
+@media (max-width: 560px) {
+  .htbah-item-icon-picker__toolbar { flex-direction:column; }
+  .htbah-item-icon-picker__reset { max-width:none; }
+  .htbah-item-icon-picker__grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+
+
+/* ----------------------------------------- */
+/*  Magic abilities tab                     */
+/* ----------------------------------------- */
+.how-to-be-a-hero.sheet.actor.character .tab.magic { min-width: 0; overflow: auto; padding: .75rem; }
+.how-to-be-a-hero .magic-tab { display:flex; flex-direction:column; gap:.75rem; min-width:0; }
+.how-to-be-a-hero .magic-tab__mana { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.75rem 1rem; border:1px solid var(--htbah-color-gold,#9f9275); border-radius:6px; background:var(--htbah-color-dark,#24232a); color:var(--htbah-color-beige,#ddd6c4); }
+.how-to-be-a-hero .magic-tab__mana h2 { margin:0; font-size:1.25rem; }
+.how-to-be-a-hero .magic-tab__mana p { margin:.15rem 0 0; opacity:.75; font-size:.85rem; }
+.how-to-be-a-hero .magic-tab__mana strong { font-size:1.25rem; white-space:nowrap; }
+.how-to-be-a-hero .magic-tab__mana-track { height:9px; overflow:hidden; border-radius:8px; background:#141318; }
+.how-to-be-a-hero .magic-tab__mana-track span { display:block; height:100%; background:#397fc0; border-radius:8px; }
+.how-to-be-a-hero .magic-ability-list { display:flex; flex-direction:column; gap:.5rem; }
+.how-to-be-a-hero .magic-ability-card { display:grid; grid-template-columns:54px minmax(0,1fr) auto; align-items:center; gap:.75rem; padding:.65rem; border:1px solid rgba(180,165,135,.35); border-radius:5px; background:var(--htbah-color-dark,#24232a); color:var(--htbah-color-beige,#ddd6c4); }
+.how-to-be-a-hero .magic-ability-card__icon { display:grid; place-items:center; width:48px; height:48px; border-radius:4px; background:#111016; }
+.how-to-be-a-hero .magic-ability-card__icon img { max-width:38px; max-height:38px; object-fit:contain; filter:invert(1); }
+.how-to-be-a-hero .magic-ability-card__details { min-width:0; }
+.how-to-be-a-hero .magic-ability-card__details h3 { margin:0 0 .2rem; font-size:1rem; }
+.how-to-be-a-hero .magic-ability-card__details p { margin:0 0 .3rem; font-size:.85rem; opacity:.85; }
+.how-to-be-a-hero .magic-ability-card__meta { display:flex; flex-wrap:wrap; gap:.35rem .8rem; font-size:.75rem; opacity:.8; }
+.how-to-be-a-hero .magic-ability-card__actions {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:.4rem;
+  min-width:max-content;
+}
+.how-to-be-a-hero .magic-ability-card__actions button { min-height:2rem; }
+/* Keep Use inside each ability card. Do not inherit .gold-button's fixed,
+   bottom-right positioning, which is reserved for the floating create button. */
+.how-to-be-a-hero .magic-ability-card__actions .magic-use-button {
+  position:relative;
+  inset:auto;
+  width:auto;
+  min-width:7.25rem;
+  height:auto;
+  min-height:2.15rem;
+  margin:0;
+  padding:.4rem .75rem;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.4rem;
+  border:1px solid var(--htbah-color-gold,#9f9275);
+  border-radius:4px;
+  background:var(--htbah-color-black,#141318);
+  color:var(--htbah-color-gold,#c7b68e);
+  box-shadow:0 0 6px var(--htbah-shadow-15,rgba(0,0,0,.15));
+  font-size:.8rem;
+  line-height:1.2;
+  white-space:nowrap;
+}
+.how-to-be-a-hero .magic-ability-card__actions .magic-use-button:hover,
+.how-to-be-a-hero .magic-ability-card__actions .magic-use-button:focus-visible {
+  border-color:var(--htbah-color-gold,#c7b68e);
+  box-shadow:0 0 7px var(--htbah-color-gold,#c7b68e);
+}
+.how-to-be-a-hero .magic-ability-card__actions .magic-use-button > i { margin:0; }
+.how-to-be-a-hero .magic-tab__empty { padding:1.5rem; text-align:center; opacity:.7; border:1px dashed var(--htbah-color-gold,#9f9275); border-radius:6px; }
+@media (max-width: 650px) {
+ .how-to-be-a-hero .magic-ability-card { grid-template-columns:42px minmax(0,1fr); }
+ .how-to-be-a-hero .magic-ability-card__icon { width:40px; height:40px; }
+ .how-to-be-a-hero .magic-ability-card__actions { grid-column:2; justify-content:flex-start; }
 }

@@ -80,3 +80,10 @@ People and credits are listed in no particular order.
 - [Malnutrition](https://game-icons.net/1x1/caro-asercion/bowl-of-rice.html)
 
 
+
+
+==============================================
+#### Additional item silhouettes introduced in v1.1.15
+==============================================
+
+The 80 additional item pictograms in `ui/icons/svg/items/` were newly drawn for this system release as simple, single-colour SVG silhouettes. They are original project assets and are not copied from the Game-icons.net collection.
