@@ -5063,3 +5063,359 @@ item-list-controls search .filter-control:hover:not(.disabled),
   font-size: var(--font-size-16);
   font-family: var(--htbah-font-roboto-slab);
 }
+
+
+/* Item creation dialog: compact category and monochrome SVG silhouette picker */
+.htbah-item-create-dialog { max-width: min(94vw, 760px); }
+.htbah-item-create-dialog .htbah-create-item { display: flex; flex-direction: column; gap: 1rem; }
+.htbah-item-create-dialog h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.htbah-create-category-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .4rem; }
+.htbah-create-category { min-height: 2.5rem; padding: .45rem .3rem; border: 1px solid var(--color-border-light-primary); border-radius: 5px; background: var(--color-cool-5); color: var(--color-light-1); font-weight: 600; cursor: pointer; }
+.htbah-create-category.active { outline: 2px solid var(--color-warm-2); background: var(--color-cool-4); }
+.htbah-icon-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .45rem; max-height: 300px; overflow-y: auto; padding: .25rem; }
+.htbah-icon-choice { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .25rem; min-height: 76px; padding: .4rem .2rem; border: 1px solid var(--color-border-light-primary); border-radius: 5px; background: var(--color-cool-5); color: var(--color-light-1); cursor: pointer; }
+.htbah-icon-choice img { width: 34px; height: 34px; object-fit: contain; filter: invert(1); }
+.htbah-icon-choice span { font-size: .68rem; line-height: 1.1; text-align: center; }
+.htbah-icon-choice.selected { outline: 2px solid var(--color-warm-2); background: var(--color-cool-4); }
+@media (max-width: 520px) { .htbah-create-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .htbah-icon-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+
+/* ----------------------------------------- */
+/* Responsive character sheet and typography */
+/* ----------------------------------------- */
+.how-to-be-a-hero.sheet.actor.character {
+  --htbah-sheet-header-height: clamp(126px, 18vh, 170px);
+  --htbah-sheet-sidebar-width: clamp(180px, 19vw, 230px);
+  min-width: min(920px, calc(100vw - 24px)) !important;
+  min-height: min(620px, calc(100vh - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: calc(100vh - 24px) !important;
+  box-sizing: border-box;
+}
+
+/* The sheet header and body act as independent scaling containers. */
+.how-to-be-a-hero.sheet.actor.character .sheet-header,
+.how-to-be-a-hero.sheet.actor.character .sheet-body {
+  container-type: inline-size;
+  --font-size-9: clamp(8px, min(0.75cqw, 1.28vh), 9px);
+  --font-size-10: clamp(9px, min(0.83cqw, 1.42vh), 10px);
+  --font-size-11: clamp(10px, min(0.92cqw, 1.57vh), 11px);
+  --font-size-12: clamp(11px, min(1.00cqw, 1.72vh), 12px);
+  --font-size-13: clamp(12px, min(1.08cqw, 1.85vh), 13px);
+  --font-size-14: clamp(12px, min(1.17cqw, 2vh), 14px);
+  --font-size-15: clamp(13px, min(1.25cqw, 2.14vh), 15px);
+  --font-size-16: clamp(14px, min(1.33cqw, 2.28vh), 16px);
+  --font-size-18: clamp(15px, min(1.50cqw, 2.57vh), 18px);
+  --font-size-21: clamp(17px, min(1.75cqw, 3vh), 21px);
+  --font-size-23: clamp(18px, min(1.92cqw, 3.28vh), 23px);
+  --font-size-30: clamp(22px, min(2.50cqw, 4.28vh), 30px);
+  --font-size-36: clamp(25px, min(3.00cqw, 5.14vh), 36px);
+  --font-size-42: clamp(28px, min(3.50cqw, 6vh), 42px);
+  --font-size-46: clamp(30px, min(3.83cqw, 6.57vh), 46px);
+}
+
+.how-to-be-a-hero.sheet.actor.character .window-content {
+  min-width: 0;
+  min-height: 0;
+  max-height: calc(100vh - 68px);
+  overflow: hidden;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-left {
+  min-width: 0;
+  padding-inline: clamp(0.75rem, 1.25vw, 1.5rem);
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-left .document-name {
+  font-size: clamp(1.85rem, min(3.8cqw, 5.5vh), 2.875rem);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-center {
+  min-width: 0;
+  padding: 0.5rem;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-center .center-box {
+  height: clamp(108px, 17vh, 135px);
+  max-width: 100%;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-body {
+  min-height: 0;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-body .main-content {
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(12px, 1.3vw, 25px);
+  gap: clamp(8px, 0.8vw, 12px);
+}
+
+/* Keep quantity and use headings separated and aligned with their columns. */
+.how-to-be-a-hero .tab.inventory .items-section .item-quantity,
+.how-to-be-a-hero .tab.inventory .items-section .item-uses {
+  flex: 0 0 92px;
+  width: 92px;
+  min-width: 0;
+}
+
+.how-to-be-a-hero .tab.inventory .items-section .items-header {
+  min-height: 32px;
+  height: auto;
+  gap: 2px;
+}
+
+.how-to-be-a-hero .tab.inventory .items-section .items-header .item-header.item-quantity,
+.how-to-be-a-hero .tab.inventory .items-section .items-header .item-header.item-uses {
+  padding: 3px 4px;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.1;
+  font-size: clamp(9px, 0.66vw, 10px);
+}
+
+/* The item picker must remain readable on narrow and short windows. */
+.htbah-item-create-dialog {
+  width: min(760px, calc(100vw - 28px)) !important;
+  max-width: calc(100vw - 28px) !important;
+  max-height: calc(100vh - 28px) !important;
+  overflow: hidden;
+}
+
+.htbah-item-create-dialog .window-content {
+  max-height: calc(100vh - 90px);
+  overflow: auto;
+}
+
+.htbah-item-create-dialog .htbah-create-item {
+  min-width: 0;
+  gap: clamp(0.6rem, 1.3vh, 1rem);
+}
+
+.htbah-item-create-dialog h3 {
+  font-size: clamp(0.85rem, 1vw, 1rem);
+  line-height: 1.25;
+}
+
+.htbah-create-category-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 112px), 1fr));
+  gap: clamp(0.25rem, 0.6vw, 0.4rem);
+}
+
+.htbah-create-category {
+  min-width: 0;
+  min-height: 2.8rem;
+  padding: 0.45rem 0.3rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  line-height: 1.15;
+  font-size: clamp(0.68rem, 0.82vw, 0.78rem);
+}
+
+.htbah-icon-grid {
+  max-height: min(300px, 36vh);
+  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+  gap: clamp(0.25rem, 0.6vw, 0.45rem);
+}
+
+.htbah-icon-choice {
+  min-width: 0;
+  min-height: clamp(64px, 9vh, 76px);
+}
+
+.htbah-icon-choice span {
+  font-size: clamp(0.62rem, 0.72vw, 0.7rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1100px) {
+  .how-to-be-a-hero.sheet.actor.character {
+    --htbah-sheet-sidebar-width: 180px;
+  }
+  .how-to-be-a-hero.sheet.actor.character .sheet-header .header-left {
+    padding-inline: 0.75rem;
+  }
+  .how-to-be-a-hero.sheet.actor.character .sheet-header .header-center {
+    padding-inline: 0.35rem;
+  }
+}
+
+@media (max-height: 760px) {
+  .how-to-be-a-hero.sheet.actor.character {
+    --htbah-sheet-header-height: 126px;
+  }
+  .how-to-be-a-hero.sheet.actor.character .sheet-header .header-center .center-box {
+    height: 108px;
+  }
+  .how-to-be-a-hero.sheet.actor.character .sheet-body .main-content {
+    padding-block: 10px;
+  }
+}
+
+@media (max-width: 700px) {
+  .htbah-create-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .htbah-icon-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+
+/* Character sheet follow-up: keep the outside tab rail visible and size the
+   four-slot initiative/header panel as a responsive grid. */
+.how-to-be-a-hero.sheet.actor.character .window-content {
+  overflow: visible !important;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-left {
+  flex: 0 1 40%;
+  width: 40%;
+  min-width: 0;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-center {
+  flex: 1 1 60%;
+  width: 60%;
+  max-width: 60%;
+  min-width: 0;
+  margin: 0;
+  padding: 0.5rem clamp(0.25rem, 0.7vw, 0.75rem);
+  overflow: visible;
+  align-items: stretch;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-center .center-box {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-stat-column {
+  min-width: 0;
+  width: auto;
+  padding-inline: clamp(0.12rem, 0.35vw, 0.35rem);
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-stat-column .stat-header {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(0.62rem, 0.9vw, 0.9rem);
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-stat-column .stat-content {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-stat-column .stat-content .drop {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: clamp(0.3rem, 0.6vw, 0.55rem) 0.2rem;
+  font-size: clamp(0.52rem, 0.72vw, 0.75rem);
+  line-height: 1.15;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.how-to-be-a-hero.sheet.actor.character .sheet-header .header-right {
+  flex: 0 0 0;
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* The tab rail is intentionally placed just outside the sheet edge. */
+.how-to-be-a-hero.sheet.actor.character nav.tabs {
+  z-index: 20;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+@media (max-width: 900px) {
+  .how-to-be-a-hero.sheet.actor.character .sheet-header .header-left {
+    flex-basis: 34%;
+    width: 34%;
+  }
+  .how-to-be-a-hero.sheet.actor.character .sheet-header .header-center {
+    flex-basis: 66%;
+    width: 66%;
+    max-width: 66%;
+  }
+  .how-to-be-a-hero.sheet.actor.character .sheet-header .header-left .document-name {
+    font-size: clamp(1.35rem, 3.1vw, 2rem);
+    letter-spacing: 1px;
+  }
+}
+
+
+/* Item SVGs use the registered icon element so currentColor renders as a light silhouette. */
+.how-to-be-a-hero .tab.inventory .items-section .item-name img.item-svg-image {
+  filter: invert(1);
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 3px;
+}
+
+/* Keep Handeln, Wissen and Soziales rollable in compact/combat mode. */
+.how-to-be-a-hero.sheet.actor.character .compact-skillset-bar {
+  display: none;
+}
+
+.how-to-be-a-hero.sheet.actor.character.compact {
+  --htbah-compact-skillset-height: 42px;
+  min-height: calc(var(--htbah-sheet-header-height) + var(--htbah-compact-skillset-height)) !important;
+  height: calc(var(--htbah-sheet-header-height) + var(--htbah-compact-skillset-height)) !important;
+  max-height: calc(var(--htbah-sheet-header-height) + var(--htbah-compact-skillset-height)) !important;
+}
+
+.how-to-be-a-hero.sheet.actor.character.compact .compact-skillset-bar {
+  display: grid;
+  flex: 0 0 var(--htbah-compact-skillset-height);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: clamp(4px, 0.6vw, 8px);
+  box-sizing: border-box;
+  padding: 3px clamp(8px, 1vw, 14px) 6px;
+  position: relative;
+  z-index: 2;
+}
+
+.how-to-be-a-hero.sheet.actor.character.compact .compact-skillset-button {
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--htbah-color-gold);
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--htbah-color-hd-1), var(--htbah-color-hd-2));
+  color: var(--htbah-color-parchment);
+  font-family: var(--htbah-font-roboto-condensed);
+  font-size: clamp(10px, 0.8vw, 13px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.how-to-be-a-hero.sheet.actor.character.compact .compact-skillset-button:hover,
+.how-to-be-a-hero.sheet.actor.character.compact .compact-skillset-button:focus-visible {
+  background: linear-gradient(90deg, var(--htbah-color-hd-2), var(--htbah-color-maroon));
+  outline: 1px solid var(--htbah-color-parchment);
+  outline-offset: 1px;
+}
