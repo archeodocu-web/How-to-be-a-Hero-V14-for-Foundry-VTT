@@ -78,25 +78,25 @@ export default class EffectsElement extends HTMLElement {
   _getContextOptions(effect) {
     const options = [
       {
-        label: "HTBAH.ContextMenuActionEdit",
+        label: game.i18n.localize("HTBAH.CONTEXTMENUACTIONEDIT"),
         icon: "<i class='fas fa-edit fa-fw'></i>",
         visible: () => effect.isOwner,
         callback: li => this._onAction(li[0], "edit")
       },
       {
-        label: "HTBAH.ContextMenuActionDuplicate",
+        label: game.i18n.localize("HTBAH.CONTEXTMENUACTIONDUPLICATE"),
         icon: "<i class='fas fa-copy fa-fw'></i>",
         visible: () => effect.isOwner,
         callback: li => this._onAction(li[0], "duplicate")
       },
       {
-        label: "HTBAH.ContextMenuActionDelete",
+        label: game.i18n.localize("HTBAH.CONTEXTMENUACTIONDELETE"),
         icon: "<i class='fas fa-trash fa-fw'></i>",
         visible: () => effect.isOwner,
         callback: li => this._onAction(li[0], "delete")
       },
       {
-        label: effect.disabled ? "HTBAH.ContextMenuActionEnable" : "HTBAH.ContextMenuActionDisable",
+        label: game.i18n.localize(effect.disabled ? "HTBAH.CONTEXTMENUACTIONENABLE" : "HTBAH.CONTEXTMENUACTIONDISABLE"),
         icon: effect.disabled ? "<i class='fas fa-check fa-fw'></i>" : "<i class='fas fa-times fa-fw'></i>",
         visible: () => effect.isOwner,
         callback: li => this._onAction(li[0], "toggle")
@@ -107,7 +107,7 @@ export default class EffectsElement extends HTMLElement {
       const uuid = effect.getRelativeUUID(this.document);
       const isFavorited = this.document.system.hasFavorite(uuid);
       options.push({
-        label: isFavorited ? "HTBAH.FavoriteRemove" : "HTBAH.Favorite",
+        label: game.i18n.localize(isFavorited ? "HTBAH.FAVORITEREMOVE" : "HTBAH.FAVORITE"),
         icon: "<i class='fas fa-star fa-fw'></i>",
         visible: () => effect.isOwner,
         callback: li => this._onAction(li[0], isFavorited ? "unfavorite" : "favorite")

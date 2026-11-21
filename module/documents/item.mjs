@@ -138,8 +138,10 @@ async roll(options = {}) {
   const isParry = options.isParry || false;
   const label = isParry ? `[${game.i18n.localize("HTBAH.Parry")}] ${item.name}` : `[${item.type}] ${item.name}`;
 
-  // Handle non-rollable items (with defensive check for undefined rollable)
-  const isRollable = this.system.rollable ?? (this.type === 'weapon' || this.type === 'ability');
+  // Weapons and abilities are inherently rollable in this system.
+  // Physical items default rollable=false, so using ?? here incorrectly
+  // prevented weapons from opening their damage-roll dialog.
+  const isRollable = this.type === 'weapon' || this.type === 'ability' || this.system.rollable === true;
   
   if (!isRollable) {
     ChatMessage.create({

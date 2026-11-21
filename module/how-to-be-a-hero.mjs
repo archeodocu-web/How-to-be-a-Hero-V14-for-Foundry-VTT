@@ -18,6 +18,11 @@ import { registerHandlebarsHelpers } from './helpers/utils.mjs';
 import { Tooltips } from './helpers/tooltips.mjs';
 import { HOW_TO_BE_A_HERO } from './helpers/config.mjs';
 import { registerSystemSettings, enforceDarkMode } from './helpers/settings.mjs';
+import { registerDamageApplicationContextMenu } from "./helpers/damage-application.mjs";
+
+// Register chat context hooks at module load, before the core ChatLog builds
+// its ApplicationV2 context menu during startup.
+registerDamageApplicationContextMenu();
 // Import DataModel classes
 import * as models from './data/_module.mjs';
 // Import Dice class
@@ -106,7 +111,7 @@ Hooks.once('init', function () {
     displayName: CONST.TOKEN_DISPLAY_MODES.OWNER_HOVER,
     displayBars: CONST.TOKEN_DISPLAY_MODES.OWNER_HOVER,
     disposition: CONST.TOKEN_DISPOSITIONS.NEUTRAL,
-    bar1: { attribute: "health" },
+    bar1: { attribute: "attributes.health" },
     bar2: { attribute: "" }
   };
 
@@ -135,7 +140,7 @@ Hooks.once('init', function () {
    * @type {String}
    */
   CONFIG.Combat.initiative = {
-    formula: '1d10 + @attributes.skillSets.action.value',
+    formula: '1d10 + @skillSetMods.action',
     decimals: 2,
   };
 
@@ -238,24 +243,69 @@ Handlebars.registerHelper('filterJoin', function(array, separator) {
 });
 
 Handlebars.registerHelper('localize', function(key) {
-  // Handle different key formats
+  // Handle different key formats.
   let localizationKey;
-  
-  if (typeof key === 'string') {
-    localizationKey = key;
-  } else if (key && typeof key === 'object' && key.string) {
-    // Handle Foundry v13 localization objects
-    localizationKey = key.string;
-  } else {
+  if (typeof key === 'string') localizationKey = key;
+  else if (key && typeof key === 'object' && key.string) localizationKey = key.string;
+  else {
     console.warn('HowToBeAHero | Invalid localization key:', key);
     return key || '';
   }
-  
-  if (!localizationKey) {
-    return '';
+
+  if (!localizationKey) return '';
+
+  const localized = game.i18n.localize(localizationKey);
+  // Foundry returns the key itself when a translation is unavailable. Older
+  // HTBAH language packs contain a mix of key casing; resolve those case-
+  // insensitively before falling back to a clean label.
+  if (localized && localized !== localizationKey && !/^HTBAH\./i.test(localized)) return localized;
+
+  if (/^HTBAH\./i.test(localizationKey)) {
+    const normalizedKey = localizationKey.toLocaleLowerCase();
+    const findCaseInsensitive = (node, prefix = '') => {
+      if (!node || typeof node !== 'object') return undefined;
+      for (const [part, value] of Object.entries(node)) {
+        const fullKey = prefix ? `${prefix}.${part}` : part;
+        if (typeof value === 'string' && fullKey.toLocaleLowerCase() === normalizedKey) return value;
+        if (value && typeof value === 'object') {
+          const nested = findCaseInsensitive(value, fullKey);
+          if (nested !== undefined) return nested;
+        }
+      }
+      return undefined;
+    };
+
+    const alternate = findCaseInsensitive(game.i18n.translations);
+    if (alternate && !/^HTBAH\./i.test(alternate)) return alternate;
+
+    const german = String(game.i18n.lang || '').toLowerCase().startsWith('de');
+    const fallbackLabels = {
+      'htbah.initiative': ['Initiative', 'Initiative'],
+      'htbah.skill': ['Fähigkeit', 'Skill'],
+      'htbah.weapon': ['Waffe', 'Weapon'],
+      'htbah.parry': ['Parade', 'Parry'],
+      'htbah.skilldrop': ['Fähigkeit ablegen', 'Drop Skill'],
+      'htbah.weapondrop': ['Waffe ablegen', 'Drop Weapon'],
+      'htbah.hitpoints': ['Lebenspunkte', 'Hit Points'],
+      'htbah.manapoints': ['Manapunkte', 'Mana Points'],
+      'htbah.favorites': ['Favoriten', 'Favorites'],
+      'htbah.newaction': ['Neue Handlung', 'New Action'],
+      'htbah.newknowledge': ['Neues Wissen', 'New Knowledge'],
+      'htbah.newsocial': ['Neue soziale Fähigkeit', 'New Social']
+    };
+    const known = fallbackLabels[normalizedKey];
+    if (known) return known[german ? 0 : 1];
+
+    // Never expose the internal HTBAH namespace to players. Keep unknown labels
+    // readable by removing the prefix and splitting camel-case identifiers.
+    return localizationKey.replace(/^HTBAH\./i, '')
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')
+      .replace(/[._]/g, ' ')
+      .trim();
   }
-  
-  return game.i18n.localize(localizationKey);
+
+  return localized || localizationKey;
 });
 
 Handlebars.registerHelper('numberFormat', function(number, options = {}) {

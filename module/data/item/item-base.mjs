@@ -13,6 +13,7 @@ export default class HowToBeAHeroItemBase extends AbstractHowToBeAHeroItemDataMo
     const schema = {};
 
     schema.description = new fields.StringField({ required: true, blank: true , label: "HOW_TO_BE_A_HERO.Item.Description"});
+    schema.icon = new fields.StringField({ required: false, blank: true, initial: "", label: "HTBAH.ItemIcon" });
 
     
     return schema;

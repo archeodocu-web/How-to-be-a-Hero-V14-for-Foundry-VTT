@@ -251,31 +251,31 @@ export default class InventoryElement extends HTMLElement {
     // Standard Options
     const options = [
       {
-        label: "HTBAH.ContextMenuActionEdit",
+        label: game.i18n.localize("HTBAH.CONTEXTMENUACTIONEDIT"),
         icon: "<i class='fas fa-edit fa-fw'></i>",
         visible: () => item.isOwner && !isEditMode,
         callback: li => this._onAction(li, "edit")
       },
       {
-        label: "HTBAH.ItemView",
+        label: game.i18n.localize("HTBAH.ITEMVIEW"),
         icon: '<i class="fas fa-eye"></i>',
         visible: () => !item.isOwner,
         callback: li => this._onAction(li, "view")
       },
       {
-        label: "HTBAH.ContextMenuActionDuplicate",
+        label: game.i18n.localize("HTBAH.CONTEXTMENUACTIONDUPLICATE"),
         icon: "<i class='fas fa-copy fa-fw'></i>",
         visible: () => !item.system.metadata?.singleton && !["class", "subclass"].includes(item.type) && item.isOwner,
         callback: li => this._onAction(li, "duplicate")
       },
       {
-        label: "HTBAH.ContextMenuActionDelete",
+        label: game.i18n.localize("HTBAH.CONTEXTMENUACTIONDELETE"),
         icon: "<i class='fas fa-trash fa-fw'></i>",
         visible: () => item.isOwner && !isEditMode,
         callback: li => this._onAction(li, "delete")
       },
       {
-        label: "HTBAH.ContextMenuActionGiveItem",
+        label: game.i18n.localize("HTBAH.CONTEXTMENUACTIONGIVEITEM"),
         icon: "<i class='fas fa-handshake fa-fw'></i>",
         visible: () => {
           const transferableTypes = ["item", "consumable", "weapon", "armor", "tool"];
@@ -289,7 +289,7 @@ export default class InventoryElement extends HTMLElement {
 
     // Toggle Equipped State - only show in edit mode (in play mode it's shown as a button)
     if ( "equipped" in item.system ) options.push({
-      label: item.system.equipped ? "HTBAH.Unequip" : "HTBAH.Equip",
+      label: game.i18n.localize(item.system.equipped ? "HTBAH.UNEQUIP" : "HTBAH.EQUIP"),
       icon: "<i class='fas fa-shield-alt fa-fw'></i>",
       visible: () => item.isOwner && isEditMode,
       callback: li => this._onAction(li, "equip"),
@@ -301,7 +301,7 @@ export default class InventoryElement extends HTMLElement {
       const uuid = foundry.utils.buildRelativeUuid(item, this.actor);
       const isFavorited = this.actor.system.hasFavorite(uuid);
       options.push({
-        label: isFavorited ? "HTBAH.FavoriteRemove" : "HTBAH.Favorite",
+        label: game.i18n.localize(isFavorited ? "HTBAH.FAVORITEREMOVE" : "HTBAH.FAVORITE"),
         icon: "<i class='fas fa-star fa-fw'></i>",
         visible: () => item.isOwner,
         callback: li => this._onAction(li, isFavorited ? "unfavorite" : "favorite"),

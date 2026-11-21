@@ -34,7 +34,12 @@ export class HowToBeAHeroRollDialog extends HandlebarsApplicationMixin(foundry.a
   };
 
   constructor(options = {}) {
-    super(options);
+    const itemName = options.item?.name || game.i18n.localize("HTBAH.UNKNOWN");
+    const localizedTitle = game.i18n.format("HTBAH.ROLLDIALOG.ROLLITEM", { item: itemName });
+    const appOptions = foundry.utils.mergeObject(options, {
+      window: { title: localizedTitle }
+    }, { inplace: false });
+    super(appOptions);
     this.item = options.item;
     this.baseFormula = options.baseFormula || "1d10";
     this.rollType = options.rollType || "check";
@@ -219,11 +224,27 @@ export class HowToBeAHeroRollDialog extends HandlebarsApplicationMixin(foundry.a
       // Create customized chat message based on item type
       const messageContent = await HowToBeAHeroRollDialog._createChatMessage(this.item, roll, rollFormula, this.bonus, this.isParry);
       
+      const targetActorUuids = Array.from(game.user.targets || [])
+        .map(token => token?.actor?.uuid)
+        .filter(uuid => typeof uuid === "string" && uuid.length > 0);
+
       const messageData = {
         user: game.user.id,
         speaker: ChatMessage.getSpeaker(),
         content: messageContent,
-        sound: CONFIG.sounds.dice
+        sound: CONFIG.sounds.dice,
+        ...(this.item?.type === "weapon" ? {
+          flags: {
+            howtobeahero: {
+              damage: {
+                amount: Math.max(0, Number(roll.total) || 0),
+                formula: rollFormula,
+                itemName: this.item.name,
+                targetActorUuids
+              }
+            }
+          }
+        } : {})
       };
       
       await ChatMessage.create(messageData);

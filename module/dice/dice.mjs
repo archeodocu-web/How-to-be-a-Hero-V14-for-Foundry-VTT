@@ -126,6 +126,18 @@ export async function d10Roll({
   // Evaluate the roll
   await roll.evaluate();
 
+  // Preserve the final computed damage on damage messages so the ChatLog action
+  // can apply exactly the same critical and bonus-adjusted total.
+  const damageRollFlag = foundry.utils.getProperty(messageData, "flags.howtobeahero.roll");
+  if (damageRollFlag?.type === "damage") {
+    foundry.utils.setProperty(messageData, "flags.howtobeahero.damage", {
+      amount: Math.max(0, Number(roll.total) || 0),
+      formula,
+      source: damageRollFlag.data?.label || flavor || "",
+      targetActorUuids: damageRollFlag.data?.targetActorUuids || []
+    });
+  }
+
   // Send chat message if requested
   if (chatMessage) {
     await roll.toMessage(messageData);
