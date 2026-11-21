@@ -1,3 +1,32 @@
+## 1.1.9
+- Fix: register the Apply Damage chat context action at module load, before the ChatLog creates its context menu.
+- Fix: bind rendered chat message elements to their ChatMessage documents for reliable context-menu lookup.
+- Feature: snapshot the targeted actor UUIDs into weapon damage messages and apply damage to the target of that attack.
+- Fix: use calculated equipped armor values as well as manually stored armor values when reducing damage.
+
+## 1.1.8
+- Corrected the Combat Tracker initiative formula to use the same derived Action modifier as character-sheet initiative rolls.
+- Registered the armor-aware chat damage action during system initialization so it is available when the ChatLog constructs its context menu.
+- Updated the ChatMessage context-menu entry to the Foundry V13/V14 ContextMenuEntry API (`label`, `visible`, and `onClick`).
+
+## 1.1.7
+- Added a ChatLog context-menu action to apply rolled damage to one targeted actor after subtracting that actor's armor value.
+- Added confirmation showing rolled damage, armor reduction, final damage, and remaining hit points.
+- Stored final damage totals in chat message flags for weapon rolls and Actor.rollDamage rolls.
+
+# Changelog
+
+## 1.1.6
+- Compact/combat mode keeps clickable Handeln, Wissen and Soziales roll buttons visible.
+- Weapon items are rollable by default and open the damage roll dialog from the header shortcut.
+- Inventory SVGs render as light silhouettes instead of black-on-black images.
+- Context menus and roll-dialog labels use localized text instead of raw HTBAH translation keys.
+
+## 1.1.4
+- Added missing localization aliases and item creation dialog translations.
+- Improved responsive character sheet sizing and typography.
+- Fixed inventory heading spacing and responsive item picker layout.
+
 # CHANGELOG
 
 ## 0.5.0
@@ -27,3 +56,10 @@
 
 ## 1.1.0
 - Release final version for Foundry 13 (v13.351)
+
+
+## 1.1.5
+- Fixed untranslated HTBAH labels with case-insensitive lookup and clean localized fallbacks.
+- Added German labels for new Action, Knowledge, and Social entries.
+- Restored the character sheet's external tab navigation by allowing window-content overflow.
+- Resized the initiative/header area as a responsive four-column grid so all four slots remain visible.

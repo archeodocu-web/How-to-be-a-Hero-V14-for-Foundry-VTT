@@ -39,7 +39,8 @@
                         <div class="item-name item-action item-tooltip {{ ctx.rollableClass }}" role="button"
                              data-action="itemAction" data-sub-action="roll" data-item-id="{{_id}}" 
                              aria-label="{{name}}" draggable="true">
-                            <img class="item-image gold-icon" src="{{img}}" alt="{{name}}">
+                            <img class="item-image gold-icon {{#if system.icon}}item-svg-image{{/if}}"
+                                 src="{{#if system.icon}}{{system.icon}}{{else}}{{img}}{{/if}}" alt="{{name}}">
                             <div class="name name-stacked">
                                 <span class="title">{{name}}</span>
                                 {{#if ctx.subtitle}}

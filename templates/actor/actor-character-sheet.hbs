@@ -90,6 +90,19 @@
     </div>
   </header>
 
+  {{!-- Quick skill-set rolls remain available while the sheet is in compact/combat mode. --}}
+  <div class="compact-skillset-bar" aria-label="{{localize 'HTBAH.SKILLSETS'}}">
+    <button type="button" class="compact-skillset-button" data-action="rollSkillSet" data-skillset="action">
+      {{localize "HTBAH.SKILLSETACTION"}}
+    </button>
+    <button type="button" class="compact-skillset-button" data-action="rollSkillSet" data-skillset="knowledge">
+      {{localize "HTBAH.SKILLSETKNOWLEDGE"}}
+    </button>
+    <button type="button" class="compact-skillset-button" data-action="rollSkillSet" data-skillset="social">
+      {{localize "HTBAH.SKILLSETSOCIAL"}}
+    </button>
+  </div>
+
   {{!-- Navigation Tabs --}}
   <nav class="tabs" data-group="primary">
     {{#each tabs}}
