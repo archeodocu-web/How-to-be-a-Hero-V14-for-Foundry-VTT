@@ -16,7 +16,7 @@ To install "How to Be a Hero" in FoundryVTT, follow these steps:
 
 2. **Manual Installation** 
    - In FoundryVTT, navigate to **Configuration → Game Systems**.  
-   - Click **"Install System"** and enter the system's manifest URL ( https://github.com/GrafSchwarz/howtobeahero/releases/latest/download/system.json ).   
+   - Click **"Install System"** and enter the system's manifest URL.   
    - Alternatively, place the extracted system files into the `Data/systems/` folder of your FoundryVTT installation.  
 
 3. **Start a New Game**  
@@ -25,6 +25,7 @@ To install "How to Be a Hero" in FoundryVTT, follow these steps:
 
 ## Important
 The system is in beta. It is ready for the latest stable version 14.369 of FoundryVTT!
+THe original developer is github.com/GrafSchwarz i couldnt wait on the next release! I also needed negative Values and Magic!
 
 ---
 
