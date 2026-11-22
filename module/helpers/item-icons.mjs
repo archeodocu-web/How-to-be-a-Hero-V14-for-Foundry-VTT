@@ -272,12 +272,6 @@ export const ITEM_ICON_CATALOG = [
   },
   {
     "type": "weapon",
-    "name": "Hellebarde",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/halberd.svg",
-    "slug": "halberd"
-  },
-  {
-    "type": "weapon",
     "name": "Kampfstab",
     "path": "systems/how-to-be-a-hero/ui/icons/svg/items/quarterstaff.svg",
     "slug": "quarterstaff"
@@ -512,12 +506,6 @@ export const ITEM_ICON_CATALOG = [
   },
   {
     "type": "item",
-    "name": "Wanduhr",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/wall-clock.svg",
-    "slug": "wall-clock"
-  },
-  {
-    "type": "item",
     "name": "Rucksack",
     "path": "systems/how-to-be-a-hero/ui/icons/svg/items/backpack.svg",
     "slug": "backpack"
@@ -560,12 +548,6 @@ export const ITEM_ICON_CATALOG = [
   },
   {
     "type": "item",
-    "name": "Münzstapel",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/coin-stack.svg",
-    "slug": "coin-stack"
-  },
-  {
-    "type": "item",
     "name": "Halskette",
     "path": "systems/how-to-be-a-hero/ui/icons/svg/items/necklace.svg",
     "slug": "necklace"
@@ -596,12 +578,6 @@ export const ITEM_ICON_CATALOG = [
   },
   {
     "type": "item",
-    "name": "Flöte",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/flute.svg",
-    "slug": "flute"
-  },
-  {
-    "type": "item",
     "name": "Laute",
     "path": "systems/how-to-be-a-hero/ui/icons/svg/items/lute.svg",
     "slug": "lute"
@@ -623,12 +599,6 @@ export const ITEM_ICON_CATALOG = [
     "name": "Brille",
     "path": "systems/how-to-be-a-hero/ui/icons/svg/items/spectacles.svg",
     "slug": "spectacles"
-  },
-  {
-    "type": "item",
-    "name": "Globus",
-    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/globe.svg",
-    "slug": "globe"
   },
   {
     "type": "item",
