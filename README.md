@@ -47,8 +47,14 @@ The system is in beta. It is ready for the latest stable version 13.348 of Found
 - This system is developed for Foundry Virtual Tabletop and complies with the Limited License Agreement for Package development as provided by Foundry Gaming LLC.
 
 ### Preview
-Character-Sheet Details
-<img width="1248" height="793" alt="Character_Details" src="https://github.com/user-attachments/assets/0666cb42-3c1a-4fd8-8bed-1c3e4d05e5ab" />
+<img width="1273" height="755" alt="grafik" src="https://github.com/user-attachments/assets/43f2f5f1-6b0e-4aa1-835b-4725e225c3d4" />
 
-Character-Sheet Inventory
-<img width="1252" height="777" alt="Character_Inventory" src="https://github.com/user-attachments/assets/146aa412-48c5-4dbd-9289-a9b7388b01b1" />
+<img width="1614" height="1293" alt="grafik" src="https://github.com/user-attachments/assets/f00bdbdd-2275-49e9-90c6-ef229b445660" />
+
+<img width="677" height="614" alt="grafik" src="https://github.com/user-attachments/assets/46e1994b-ddfd-48ed-bbd0-ca8027be38b3" />
+
+<img width="1292" height="866" alt="grafik" src="https://github.com/user-attachments/assets/df419b68-fba5-4684-964e-e462f587db57" />
+
+
+
+
