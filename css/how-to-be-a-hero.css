@@ -5375,7 +5375,11 @@ item-list-controls search .filter-control:hover:not(.disabled),
 }
 
 .how-to-be-a-hero.sheet.actor.character.compact .compact-skillset-button {
+  width: 100%;
   min-width: 0;
+  max-width: 180px;
+  justify-self: center;
+  box-sizing: border-box;
   padding: 4px 8px;
   border: 1px solid var(--htbah-color-gold);
   border-radius: 5px;
@@ -5386,6 +5390,9 @@ item-list-controls search .filter-control:hover:not(.disabled),
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
   cursor: pointer;
 }
 
@@ -5659,3 +5666,58 @@ item-list-controls search .filter-control:hover:not(.disabled),
  .how-to-be-a-hero .magic-ability-card__icon { width:40px; height:40px; }
  .how-to-be-a-hero .magic-ability-card__actions { grid-column:2; justify-content:flex-start; }
 }
+
+/* Readability fix: let long skill names wrap instead of being cut off. */
+.how-to-be-a-hero.sheet.actor.character .tab.details .skillSet-list > .item {
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.how-to-be-a-hero.sheet.actor.character .tab.details .skillSet-list > .item .item-name {
+  min-width: 0;
+  overflow: visible;
+  flex: 0 1 55%;
+  box-sizing: border-box;
+  padding-right: 30px; /* Reserve a separate lane for the d20 icon. */
+}
+
+.how-to-be-a-hero.sheet.actor.character .tab.details .skillSet-list > .item .item-name h3 {
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-overflow: clip;
+  line-height: 1.2;
+}
+
+/* Give the item-name field the full available header width and keep long names legible. */
+.how-to-be-a-hero.sheet.item .sheet-header .header-fields {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.how-to-be-a-hero.sheet.item .sheet-header .header-fields .charname {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.how-to-be-a-hero.sheet.item .sheet-header .header-fields input[name="name"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: clamp(18px, 1.8vw, 26px);
+  line-height: 1.1;
+}
+
+/* Keep text and numeric fields inside the item sidebar instead of clipping at its edges. */
+.how-to-be-a-hero.sheet.item .sheet-body .sidebar input:not([type="checkbox"]),
+.how-to-be-a-hero.sheet.item .sheet-body .sidebar select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
