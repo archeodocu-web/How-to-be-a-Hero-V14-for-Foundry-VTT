@@ -1,0 +1,17 @@
+<div class="htbah-character-creator-shell">
+  <div class="htbah-character-creator-toolbar">
+    <p>{{localize "HTBAH.CharacterCreator.Description"}}</p>
+    <button type="button" data-action="openExternal" class="htbah-character-creator-fallback">
+      <i class="fas fa-up-right-from-square"></i>
+      {{localize "HTBAH.CharacterCreator.OpenExternal"}}
+    </button>
+  </div>
+  <iframe
+    class="htbah-character-creator-frame"
+    src="{{creatorUrl}}"
+    title="{{localize 'HTBAH.CharacterCreator.Title'}}"
+    loading="eager"
+    referrerpolicy="no-referrer"
+    allow="fullscreen"
+  ></iframe>
+</div>
