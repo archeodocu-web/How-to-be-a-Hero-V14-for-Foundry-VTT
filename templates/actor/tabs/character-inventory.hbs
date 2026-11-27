@@ -33,7 +33,7 @@
                     {{#each items}}
                     <li class="item" data-item-id="{{_id}}" data-entry-id="{{_id}}"
                         data-item-name="{{name}}" data-item-sort="{{sort}}" data-ungrouped="all"
-                        data-grouped="{{type}}">
+                        data-grouped="{{#if (eq type "container")}}item{{else}}{{type}}{{/if}}">
 
                         <div class="item-name item-action item-tooltip {{ ctx.rollableClass }}" role="button"
                              data-action="itemAction" data-sub-action="roll" data-item-id="{{_id}}" 
@@ -49,6 +49,9 @@
                         </div>
 
                         <div class="item-detail item-quantity">
+                            {{#if (eq type "container")}}
+                            <span class="container-fixed-quantity">1</span>
+                            {{else}}
                             {{#if @root.owner}}
                             <a class="adjustment-button" data-action="adjustQuantity" data-direction="decrease" data-property="system.quantity">
                                 <i class="fas fa-minus"></i>
@@ -61,6 +64,7 @@
                             <a class="adjustment-button" data-action="adjustQuantity" data-direction="increase" data-property="system.quantity">
                                 <i class="fas fa-plus"></i>
                             </a>
+                            {{/if}}
                             {{/if}}
                         </div>
 
@@ -85,6 +89,12 @@
                             {{/with}}
                             {{/if}}
 
+                            {{#if (eq type "container")}}
+                            <a class="item-control item-container-open" data-action="toggleContainer" data-container-id="{{_id}}"
+                               data-tooltip="HTBAH.ContainerOpen" aria-label="{{ localize "HTBAH.ContainerOpen" }}" aria-expanded="false">
+                                <i class="fas fa-suitcase"></i>
+                            </a>
+                            {{/if}}
                             <a class="item-control interface-only" data-context-menu
                                aria-label="{{ localize "HTBAH.AdditionalControls" }}">
                                 <i class="fas fa-ellipsis-vertical"></i>
@@ -96,5 +106,6 @@
             </div>
             {{/each}}
         </section>
+        {{> "htbah.container-inventory" }}
     </div>
 </htbah-inventory>
