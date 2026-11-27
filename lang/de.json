@@ -618,5 +618,20 @@
   "HTBAH.Item.DiceSize": "Würfelgröße",
   "HTBAH.Magic.Target": "Ziel",
   "HTBAH.Magic.SelectExactlyOneTarget": "Bitte vor dem Anwenden genau einen Charakter mit T anvisieren.",
-  "HTBAH.Magic.EffectTargetHint": "Der Effekt wird nach dem Benutzen per Rechtsklick auf das beim Wirken mit T markierte Ziel angewendet."
+  "HTBAH.Magic.EffectTargetHint": "Der Effekt wird nach dem Benutzen per Rechtsklick auf das beim Wirken mit T markierte Ziel angewendet.",
+  "HTBAH.Container": "Koffer",
+  "HTBAH.CreateCategoryContainer": "Koffer",
+  "HTBAH.DefaultContainerName": "Koffer",
+  "HTBAH.ContainerOpen": "Koffer-Inhalt öffnen",
+  "HTBAH.ContainerContents": "Inhalt",
+  "HTBAH.ContainerItemCount": "Gegenstände",
+  "HTBAH.ContainerEmpty": "Der Koffer ist leer. Ziehe Gegenstände hier hinein.",
+  "HTBAH.ContainerSheetHint": "Ein Koffer ist ein einzelner Behälter. Für jeden weiteren Koffer wird ein eigenes Item angelegt.",
+  "HTBAH.ContainerSheetContentsHint": "Öffne den Koffer im Gegenstände-Reiter, um Gegenstände hinein- oder herauszuziehen.",
+  "HTBAH.ContainerMissing": "Der ausgewählte Koffer ist nicht mehr vorhanden.",
+  "HTBAH.ContainerDropFailed": "Der Gegenstand konnte nicht in den Koffer gelegt werden.",
+  "HTBAH.ContainerItemNotAllowed": "In den Koffer können Gegenstände, Verbrauchsgegenstände, Waffen, Rüstungen und Werkzeuge gelegt werden. Andere Koffer und Fähigkeiten sind nicht zulässig.",
+  "HTBAH.ContainerItemCategoryMismatch": "Der Gegenstand muss in die passende Kategorie des Koffers gelegt werden.",
+  "HTBAH.ContainerDropHere": "Hier ablegen, um in den Koffer zu verschieben",
+  "HTBAH.ContainerTransferPermission": "Du hast keine Berechtigung, diesen Gegenstand aus dem anderen Charakter zu verschieben."
 }

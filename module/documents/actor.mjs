@@ -90,7 +90,7 @@ export class HowToBeAHeroActor extends Actor {
     
     // Get all equipped armor items
     const equippedArmor = this.items.filter(item => 
-      item.type === 'armor' && item.system.equipped === true
+      item.type === 'armor' && item.system.equipped === true && !item.system.containerId
     );
     
     // Calculate total armor value from equipped items only

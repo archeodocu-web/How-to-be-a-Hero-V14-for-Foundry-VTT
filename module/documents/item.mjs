@@ -44,6 +44,21 @@ export class HowToBeAHeroItem extends Item {
   }
 
   /** @override */
+  async _preDelete(options, user) {
+    // Never leave contained items hidden when their Koffer is removed.
+    if (this.type === "container" && this.actor) {
+      const contained = this.actor.items.filter(item => item.system?.containerId === this.id);
+      if (contained.length) {
+        await this.actor.updateEmbeddedDocuments("Item", contained.map(item => ({
+          _id: item.id,
+          "system.containerId": ""
+        })));
+      }
+    }
+    return super._preDelete(options, user);
+  }
+
+  /** @override */
   prepareBaseData() {
     // Data modifications in this step occur before processing embedded
     // documents or derived data.
@@ -67,6 +82,8 @@ export class HowToBeAHeroItem extends Item {
       case "baseitem":
         this._prepareBaseItem(); break;
       case "item":
+        this._prepareItem(); break;
+      case "container":
         this._prepareItem(); break;
       case "consumable":
         this._prepareConsumable(); break;

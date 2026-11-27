@@ -48,7 +48,7 @@ export default class HowToBeAHeroCharacter extends HowToBeAHeroActorBase {
 
   _updateArmorValue() {
     const equippedArmor = this.parent.items.filter(item => 
-      item.type === "armor" && item.system.equipped);
+      item.type === "armor" && item.system.equipped && !item.system.containerId);
     const totalArmorValue = equippedArmor.reduce((sum, armor) => 
       sum + (armor.system.armor || 0), 0);
     this.parent.system.attributes.armor.value = totalArmorValue;

@@ -110,7 +110,8 @@ class NameInputDialog extends foundry.applications.api.HandlebarsApplicationMixi
         { type: "consumable", label: game.i18n.localize("HTBAH.CreateCategoryConsumable") },
         { type: "armor", label: game.i18n.localize("HTBAH.CreateCategoryArmor") },
         { type: "tool", label: game.i18n.localize("HTBAH.CreateCategoryTool") },
-        { type: "item", label: game.i18n.localize("HTBAH.CreateCategoryItem") }
+        { type: "item", label: game.i18n.localize("HTBAH.CreateCategoryItem") },
+        { type: "container", label: game.i18n.localize("HTBAH.CreateCategoryContainer") }
       ],
       selectedType: this.selectedType, selectedIcon: this.selectedIcon
     };
@@ -141,6 +142,10 @@ class NameInputDialog extends foundry.applications.api.HandlebarsApplicationMixi
       if (iconSearch) iconSearch.value = "";
       const firstIcon = ITEM_ICON_CATALOG.find(icon => icon.type === this.selectedType);
       this.selectedIcon = firstIcon?.path ?? "";
+      const nameInput = this.element.querySelector('input[name="name"]');
+      if (this.selectedType === "container" && nameInput && !nameInput.value.trim()) {
+        nameInput.value = game.i18n.localize("HTBAH.DefaultContainerName");
+      }
       updateSelection();
     }));
     iconButtons.forEach(button => button.addEventListener("click", () => {
@@ -194,6 +199,7 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
     actions: {
       toggleMode: this.prototype._onChangeSheetMode,
       createDocument: this.prototype._onCreateDocument,
+      toggleContainer: this.prototype._onToggleContainer,
       rollSkillSet: this.prototype._onRollSkillSet,
       itemAction: this.prototype._onItemAction,
       useMagic: this.prototype._onUseMagic,
@@ -308,6 +314,21 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
       
       // Setup tab handling using simple click events
       this._setupTabHandling();
+
+      // Item updates rerender the actor sheet. Keep the currently opened
+      // Koffer visible so players can move several items without reopening it.
+      if (this._openContainerId) {
+        const openPanel = [...this.element.querySelectorAll(".container-inventory-panel")]
+          .find(panel => panel.dataset.containerPanel === this._openContainerId);
+        if (openPanel) {
+          openPanel.hidden = false;
+          this.element.querySelectorAll('[data-action="toggleContainer"]').forEach(button => {
+            button.setAttribute("aria-expanded", String(button.dataset.containerId === this._openContainerId));
+          });
+        } else {
+          this._openContainerId = null;
+        }
+      }
       
       // Apply tooltips
       this._initializeTooltips();
@@ -741,7 +762,7 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
 
     if (weaponId) {
       const item = this.document.items.get(weaponId);
-      if (item) {
+      if (item && !item.system?.containerId) {
         headerItems.weapon = {
           id: item.id,
           name: item.name,
@@ -797,46 +818,51 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
    */
   _prepareItems(context) {
     const allItems = this.document.items;
-    
-    // Containers for different item types
-    const items = [];
-    const consumables = [];
-    const weapons = [];
-    const armors = [];
-    const tools = [];
-    const abilities = [];
-    const magicAbilities = [];
 
+    // Items assigned to a container remain real Actor Items. Only their display
+    // location changes, so editing, quantity changes and deletion still use the
+    // normal Foundry Item document APIs.
     for (const item of allItems) {
       item.img ||= Item.DEFAULT_ICON;
-
-      // Prepare item context for template usage
       item.ctx = this._prepareItemContext(item);
-
-      switch (item.type) {
-        case "item":
-          items.push(item);
-          break;
-        case "consumable":
-          consumables.push(item);
-          break;
-        case "weapon":
-          weapons.push(item);
-          break;
-        case "armor":
-          armors.push(item);
-          break;
-        case "tool":
-          tools.push(item);
-          break;
-        case "ability":
-          abilities.push(item);
-          break;
-        case "magic":
-          magicAbilities.push(item);
-          break;
-      }
     }
+
+    const rootItems = allItems.filter(item => !item.system?.containerId);
+    const groupItems = collection => collection.filter(item => item.type === "item" || item.type === "container");
+    const items = groupItems(rootItems);
+    const consumables = rootItems.filter(item => item.type === "consumable");
+    const weapons = rootItems.filter(item => item.type === "weapon");
+    const armors = rootItems.filter(item => item.type === "armor");
+    const tools = rootItems.filter(item => item.type === "tool");
+    const abilities = rootItems.filter(item => item.type === "ability");
+    const magicAbilities = rootItems.filter(item => item.type === "magic");
+
+    const makeSections = (collection, includeContainers = false) => [
+      { label: "HTBAH.ItemPl", dataset: { type: "item" }, items: collection.filter(item => item.type === "item" || (includeContainers && item.type === "container")) },
+      { label: "HTBAH.consumablePl", dataset: { type: "consumable" }, items: collection.filter(item => item.type === "consumable") },
+      { label: "HTBAH.weaponPl", dataset: { type: "weapon" }, items: collection.filter(item => item.type === "weapon") },
+      { label: "HTBAH.armorPl", dataset: { type: "armor" }, items: collection.filter(item => item.type === "armor") },
+      { label: "HTBAH.toolPl", dataset: { type: "tool" }, items: collection.filter(item => item.type === "tool") }
+    ];
+
+    // Create a separate panel for each Koffer. These panels intentionally sit
+    // outside data-item-list="inventory" so the normal search/group/sort controls
+    // never pull contained items back into the character's carried inventory.
+    context.containerPanels = allItems
+      .filter(item => item.type === "container" && !item.system?.containerId)
+      .map(container => {
+        const contents = allItems.filter(item => item.system?.containerId === container.id);
+        const sections = makeSections(contents);
+        for (const section of sections) {
+          section.items.sort((a, b) => (a.sort || 0) - (b.sort || 0));
+        }
+        return {
+          id: container.id,
+          name: container.name,
+          itemCount: contents.length,
+          sections
+        };
+      });
 
     // Attach to context
     context.skillSets = this.document.skillSetData || {};
@@ -848,18 +874,9 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
     context.abilities = abilities;
     context.magicAbilities = magicAbilities.sort((a, b) => (a.sort || 0) - (b.sort || 0));
 
-    // Create sections array for use in the template
-    context.sections = [
-      { label: "HTBAH.ItemPl", dataset: { type: "item" }, items: items },
-      { label: "HTBAH.consumablePl", dataset: { type: "consumable" }, items: consumables },
-      { label: "HTBAH.weaponPl", dataset: { type: "weapon" }, items: weapons },
-      { label: "HTBAH.armorPl", dataset: { type: "armor" }, items: armors },
-      { label: "HTBAH.toolPl", dataset: { type: "tool" }, items: tools },
-    ];
-
-    // Sort items within each section
-    for (let section of context.sections) {
-      section.items?.sort((a, b) => (a.sort || 0) - (b.sort || 0));
+    context.sections = makeSections(rootItems, true);
+    for (const section of context.sections) {
+      section.items.sort((a, b) => (a.sort || 0) - (b.sort || 0));
     }
   }
 
@@ -872,7 +889,7 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
     const ctx = {};
 
     // Prepare equip context
-    if (["weapon", "armor"].includes(item.type)) {
+    if (["weapon", "armor"].includes(item.type) && !item.system?.containerId) {
       const isEquipped = item.system.equipped || false;
       ctx.equip = {
         applicable: true,
@@ -884,7 +901,7 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
 
     // Prepare rollable context - abilities are always rollable, others need rollable property set to true
     const rollableClasses = [];
-    if (this.isEditable && (item.type === "weapon" || item.type === "ability" || item.system.rollable === true)) {
+    if (!item.system?.containerId && this.isEditable && (item.type === "weapon" || item.type === "ability" || item.system.rollable === true)) {
       rollableClasses.push("rollable");
     }
     ctx.rollableClass = rollableClasses.join(" ");
@@ -1324,7 +1341,7 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
         if (item) item.roll();
         break;
       case "equip":
-        if (item && ['weapon', 'armor'].includes(item.type)) {
+        if (item && !item.system?.containerId && ['weapon', 'armor'].includes(item.type)) {
           item.update({ "system.equipped": !item.system.equipped });
         }
         break;
@@ -1522,6 +1539,29 @@ export class HowToBeAHeroActorSheet extends HandlebarsApplicationMixin(foundry.a
       });
       dialog.render(true);
     });
+  }
+
+  /**
+   * Open or close a Koffer sub-inventory without changing the main inventory tab.
+   */
+  _onToggleContainer(event, target) {
+    event.preventDefault();
+    const containerId = target.dataset.containerId || target.closest("[data-item-id]")?.dataset.itemId;
+    if (!containerId) return;
+
+    const panel = [...this.element.querySelectorAll(".container-inventory-panel")]
+      .find(element => element.dataset.containerPanel === containerId);
+    if (!panel) return;
+
+    const shouldOpen = panel.hidden;
+    this._openContainerId = shouldOpen ? containerId : null;
+    this.element.querySelectorAll(".container-inventory-panel").forEach(element => {
+      element.hidden = true;
+    });
+    this.element.querySelectorAll('[data-action="toggleContainer"]').forEach(button => {
+      button.setAttribute("aria-expanded", String(button.dataset.containerId === containerId && shouldOpen));
+    });
+    panel.hidden = !shouldOpen;
   }
 
   /**

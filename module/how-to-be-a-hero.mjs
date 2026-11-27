@@ -157,11 +157,13 @@ Hooks.once('init', function () {
     weapon: models.HowToBeAHeroWeapon,
     armor: models.HowToBeAHeroArmor,
     tool: models.HowToBeAHeroTool,
+    container: models.HowToBeAHeroContainer,
     ability: models.HowToBeAHeroAbility,
     magic: models.HowToBeAHeroMagic
   }
   CONFIG.Item.typeLabels ??= {};
   CONFIG.Item.typeLabels.magic = "HTBAH.MagicAbility";
+  CONFIG.Item.typeLabels.container = "HTBAH.Container";
   
   // Verify that all data models are defined
   for (let [key, model] of Object.entries(CONFIG.Actor.dataModels)) {

@@ -27,7 +27,8 @@ export const preloadHandlebarsTemplates = async function () {
     
     // Actor parts partials
     parts: [
-      "systems/how-to-be-a-hero/templates/actor/parts/actor-items.hbs"
+      "systems/how-to-be-a-hero/templates/actor/parts/actor-items.hbs",
+      "systems/how-to-be-a-hero/templates/actor/parts/container-inventory.hbs"
     ],
     
     // Item partials (for ItemSheet AppV2)
@@ -43,6 +44,7 @@ export const preloadHandlebarsTemplates = async function () {
       "systems/how-to-be-a-hero/templates/item/parts/ability-sidebar.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/magic-sidebar.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/item-sidebar.hbs",
+      "systems/how-to-be-a-hero/templates/item/parts/container-sidebar.hbs",
       // Item type-specific content parts
       "systems/how-to-be-a-hero/templates/item/parts/weapon-content.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/armor-content.hbs",
@@ -50,7 +52,8 @@ export const preloadHandlebarsTemplates = async function () {
       "systems/how-to-be-a-hero/templates/item/parts/tool-content.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/ability-content.hbs",
       "systems/how-to-be-a-hero/templates/item/parts/magic-content.hbs",
-      "systems/how-to-be-a-hero/templates/item/parts/item-content.hbs"
+      "systems/how-to-be-a-hero/templates/item/parts/item-content.hbs",
+      "systems/how-to-be-a-hero/templates/item/parts/container-content.hbs"
     ],
 
     // Dialog templates (for AppV2 dialogs)

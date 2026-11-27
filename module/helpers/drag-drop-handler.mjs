@@ -48,6 +48,17 @@ export class HowToBeAHeroDragDropHandler {
         }
       }
 
+      // Container sub-inventory drop targets are handled before the regular
+      // category sections so a drop moves the existing item into the Koffer.
+      const containerSection = dropTarget.closest('.items-section[data-container-id]');
+      if (containerSection) {
+        return {
+          action: "container",
+          type: containerSection.dataset.type,
+          containerId: containerSection.dataset.containerId
+        };
+      }
+
       // Check for inventory item type sections
       const inventorySection = dropTarget.closest('.items-section');
       if (inventorySection) {
@@ -73,6 +84,10 @@ export class HowToBeAHeroDragDropHandler {
      */
     onDragOver(event) {
       event.preventDefault();
+      // Inventory sections are dedicated drop zones. Stop their dragover from
+      // bubbling to the whole sheet, whose generic handler would clear the
+      // section's visual feedback immediately afterward.
+      if (event.currentTarget?.matches?.(".items-section")) event.stopPropagation();
       event.dataTransfer.dropEffect = 'move';
 
       // Add visual feedback for drop zones
@@ -97,7 +112,7 @@ export class HowToBeAHeroDragDropHandler {
         }
       } else if (actionConfig.action === "favorite") {
         dropTarget.classList.add('dragover');
-      } else if (actionConfig.action === "itemType") {
+      } else if (actionConfig.action === "itemType" || actionConfig.action === "container") {
         const inventorySection = dropTarget.closest('.items-section');
         if (inventorySection) {
           inventorySection.classList.add('dragover');
@@ -220,6 +235,12 @@ export class HowToBeAHeroDragDropHandler {
       }
     
       const actionConfig = this._getDragActionType(event.target);
+
+      // A Koffer drop changes the item's container reference instead of creating
+      // a copy. Handle it before cross-actor exchange and the default drop path.
+      if (actionConfig.action === "container") {
+        return this._handleContainerDrop(data, actionConfig.containerId, actionConfig.type);
+      }
     
       // First check if this is an item exchange with another character
       const targetActor = this._getTargetActor(event.target);
@@ -363,6 +384,21 @@ export class HowToBeAHeroDragDropHandler {
             return false;
           }
 
+
+          // Dragging a contained item back to one of the main inventory categories
+          // clears its container reference. No new Item document is created.
+          if (actorItemForType.system?.containerId) {
+            const sameCategory = actorItemForType.type === actionConfig.type;
+            if (sameCategory) {
+              return actorItemForType.update({ "system.containerId": "" });
+            }
+          }
+
+          // A Koffer is a container document, not a regular inventory item.
+          // Never convert it into another type, which would otherwise detach
+          // its contents when the old container document is deleted.
+          if (actorItemForType.type === "container") return false;
+
           // Don't allow dropping in the same item type
           if (itemTypeItem.type === actionConfig.type) {
             console.log(`ItemType drop - same item type: ${actionConfig.type}`);
@@ -396,6 +432,100 @@ export class HowToBeAHeroDragDropHandler {
     }
 
     /**
+     * Move an item into a Koffer. Items already owned by this Actor are updated
+     * in place; items dragged from another Actor or the world are imported once.
+     * Nested Koffer are intentionally disallowed to keep ownership unambiguous.
+     * @param {object} data Foundry drag data.
+     * @param {string} containerId Target Koffer Item id.
+     * @returns {Promise<boolean|object>}
+     * @private
+     */
+    async _handleContainerDrop(data, containerId, categoryType) {
+      const container = this.actor.items.get(containerId);
+      if (!container || container.type !== "container") {
+        ui.notifications.warn(game.i18n.localize("HTBAH.ContainerMissing"));
+        return false;
+      }
+      if (data?.type !== "Item") return false;
+
+      let droppedItem;
+      try {
+        droppedItem = await Item.implementation.fromDropData(data);
+      } catch (error) {
+        console.error("HowToBeAHero | Could not resolve dropped item for Koffer:", error);
+        ui.notifications.error(game.i18n.localize("HTBAH.ContainerDropFailed"));
+        return false;
+      }
+      if (!droppedItem) return false;
+
+      const allowedTypes = ["item", "consumable", "weapon", "armor", "tool"];
+      if (!allowedTypes.includes(droppedItem.type)) {
+        ui.notifications.warn(game.i18n.localize("HTBAH.ContainerItemNotAllowed"));
+        return false;
+      }
+      if (droppedItem.type !== categoryType) {
+        ui.notifications.warn(game.i18n.localize("HTBAH.ContainerItemCategoryMismatch"));
+        return false;
+      }
+
+      // Resolve ownership via the source document's Actor. Item ids are only
+      // unique within an Actor, so an id collision must never move the wrong item.
+      const sourceActor = droppedItem.actor ?? (data.sourceActorId === this.actor.id ? this.actor : null);
+      const ownedItem = sourceActor === this.actor ? this.actor.items.get(droppedItem.id) : null;
+      if (ownedItem) {
+        if (ownedItem.system?.containerId === container.id) return true;
+        const updateData = { "system.containerId": container.id };
+        // Stored weapons and armor are no longer carried or equipped.
+        if (["weapon", "armor"].includes(ownedItem.type)) {
+          updateData["system.equipped"] = false;
+        }
+        const updatedItem = await ownedItem.update(updateData);
+        if (ownedItem.type === "weapon" && this.actor.getFlag("how-to-be-a-hero", "headerWeapon") === ownedItem.id) {
+          await this.actor.unsetFlag("how-to-be-a-hero", "headerWeapon");
+        }
+        return updatedItem;
+      }
+      if (sourceActor === this.actor) return false;
+
+      const sourceItem = sourceActor?.items?.get(droppedItem.id);
+      if (sourceItem && sourceActor !== this.actor && !(game.user.isGM || sourceActor.isOwner)) {
+        ui.notifications.warn(game.i18n.localize("HTBAH.ContainerTransferPermission"));
+        return false;
+      }
+
+      const itemData = droppedItem.toObject();
+      delete itemData._id;
+      itemData.system ??= {};
+      itemData.system.containerId = container.id;
+      if (["weapon", "armor"].includes(droppedItem.type)) itemData.system.equipped = false;
+
+      try {
+        const [createdItem] = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+        if (!createdItem) return false;
+
+        // Actor-owned Items are moved, not copied. Roll back the destination
+        // copy if deleting the source fails, preserving the no-duplicate rule.
+        if (sourceItem && sourceActor !== this.actor) {
+          try {
+            await sourceItem.delete();
+          } catch (deleteError) {
+            await createdItem.delete();
+            throw deleteError;
+          }
+          if (droppedItem.type === "weapon" && sourceActor.getFlag("how-to-be-a-hero", "headerWeapon") === droppedItem.id) {
+            await sourceActor.unsetFlag("how-to-be-a-hero", "headerWeapon");
+          }
+        }
+        // Items from the world or a compendium have no Actor source and are imported.
+        return true;
+      } catch (error) {
+        console.error("HowToBeAHero | Could not put item into Koffer:", error);
+        ui.notifications.error(game.i18n.localize("HTBAH.ContainerDropFailed"));
+        return false;
+      }
+    }
+
+    /**
      * Convert an item from one type to another by creating a new item and deleting the old one
      * @param {Item} sourceItem - The original item to convert
      * @param {string} targetType - The target item type
@@ -420,7 +550,8 @@ export class HowToBeAHeroDragDropHandler {
           type: targetType,
           sort: sourceItem.sort,
           system: {
-            description: sourceItem.system.description || ""
+            description: sourceItem.system.description || "",
+            containerId: ""
           }
         };
 
@@ -693,6 +824,9 @@ export class HowToBeAHeroDragDropHandler {
       // Create a copy of the item data for the target actor
       const itemData = sourceItem.toObject();
       delete itemData._id; // Remove the ID so a new one is generated
+      itemData.system ??= {};
+      // Items transferred to another character leave their previous container.
+      itemData.system.containerId = "";
 
       try {
         // Add the item to the target actor

@@ -296,7 +296,7 @@ export default class InventoryElement extends HTMLElement {
     if ( !this.actor || (this.actor.type === "group") ) return options;
 
     // Toggle Equipped State - only show in edit mode (in play mode it's shown as a button)
-    if ( "equipped" in item.system ) options.push({
+    if ( "equipped" in item.system && !item.system?.containerId ) options.push({
       label: game.i18n.localize(item.system.equipped ? "HTBAH.UNEQUIP" : "HTBAH.EQUIP"),
       icon: "<i class='fas fa-shield-alt fa-fw'></i>",
       visible: () => canEditItem && isEditMode,
@@ -419,6 +419,7 @@ export default class InventoryElement extends HTMLElement {
       case "view":
         return item.sheet.render(true);
       case "equip":
+        if (item.system?.containerId) return false;
         return item.update({"system.equipped": !item.system.equipped});
       case "expand":
         return this._onExpand(target, item);

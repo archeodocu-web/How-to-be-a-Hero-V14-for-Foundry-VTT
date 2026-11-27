@@ -636,5 +636,20 @@
   "HTBAH.Item.DiceSize": "Die Size",
   "HTBAH.Magic.Target": "Target",
   "HTBAH.Magic.SelectExactlyOneTarget": "Target exactly one character with T before using this ability.",
-  "HTBAH.Magic.EffectTargetHint": "After use, apply this effect by right-clicking the chat message; it is applied to the target selected with T when the ability was used."
+  "HTBAH.Magic.EffectTargetHint": "After use, apply this effect by right-clicking the chat message; it is applied to the target selected with T when the ability was used.",
+  "HTBAH.Container": "Suitcase",
+  "HTBAH.CreateCategoryContainer": "Suitcase",
+  "HTBAH.DefaultContainerName": "Suitcase",
+  "HTBAH.ContainerOpen": "Open suitcase contents",
+  "HTBAH.ContainerContents": "Contents",
+  "HTBAH.ContainerItemCount": "items",
+  "HTBAH.ContainerEmpty": "The suitcase is empty. Drag items here.",
+  "HTBAH.ContainerSheetHint": "A suitcase is a single container. Create a separate item for each additional suitcase.",
+  "HTBAH.ContainerSheetContentsHint": "Open the suitcase in the Items tab to move items in or out.",
+  "HTBAH.ContainerMissing": "The selected suitcase no longer exists.",
+  "HTBAH.ContainerDropFailed": "The item could not be placed in the suitcase.",
+  "HTBAH.ContainerItemNotAllowed": "Only items, consumables, weapons, armor, and tools can be placed in a suitcase. Other suitcases and abilities are not allowed.",
+  "HTBAH.ContainerItemCategoryMismatch": "The item must be placed in the matching suitcase category.",
+  "HTBAH.ContainerDropHere": "Drop here to move into the suitcase",
+  "HTBAH.ContainerTransferPermission": "You do not have permission to move this item from the other character."
 }

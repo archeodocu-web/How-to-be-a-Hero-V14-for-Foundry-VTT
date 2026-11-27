@@ -1,6 +1,12 @@
 /** Shared SVG silhouette catalog used by item creation and item editing. */
 export const ITEM_ICON_CATALOG = [
   {
+    "type": "container",
+    "name": "Koffer",
+    "path": "systems/how-to-be-a-hero/ui/icons/svg/items/treasure-chest.svg",
+    "slug": "container"
+  },
+  {
     "type": "weapon",
     "name": "Schwert",
     "path": "systems/how-to-be-a-hero/ui/icons/svg/items/sword.svg",

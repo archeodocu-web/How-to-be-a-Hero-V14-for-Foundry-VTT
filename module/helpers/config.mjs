@@ -495,6 +495,7 @@ HOW_TO_BE_A_HERO.defaultArtwork = {
     weapon: "systems/how-to-be-a-hero/ui/icons/svg/items/sharp-axe.svg",
     armor: "systems/how-to-be-a-hero/ui/icons/svg/items/armor-vest.svg",
     tool: "systems/how-to-be-a-hero/ui/icons/svg/items/3d-hammer.svg",
+    container: "systems/how-to-be-a-hero/ui/icons/svg/items/treasure-chest.svg",
     ability: "systems/how-to-be-a-hero/ui/icons/svg/items/skills.svg",
   }
 };
